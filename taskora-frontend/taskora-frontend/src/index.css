@@ -1,0 +1,210 @@
+/* =========================================
+   1. PREMIUM FIGMA VARIABLES (SaaS Theme)
+========================================= */
+:root {
+  /* Brand Colors */
+  --primary-color: #4f46e5; /* Indigo */
+  --primary-hover: #4338ca;
+  --secondary-color: #7c3aed; /* Purple */
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
+
+  /* Backgrounds & Text */
+  --bg-main: #f4f7fe; /* Slightly cooler, modern gray/blue background */
+  --bg-card: #ffffff;
+  --text-dark: #0f172a; /* Slate 900 */
+  --text-muted: #64748b; /* Slate 500 */
+  --border-color: #e2e8f0;
+
+  /* Typography */
+  --font-family-main: "Inter", system-ui, sans-serif;
+
+  /* Styling Dimensions */
+  --border-radius-sm: 10px;
+  --border-radius-md: 20px;
+  --border-radius-lg: 30px;
+
+  /* Depth & Shadows */
+  --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04);
+  --shadow-md:
+    0 10px 15px -3px rgba(15, 23, 42, 0.08),
+    0 4px 6px -2px rgba(15, 23, 42, 0.04);
+  --shadow-hover:
+    0 20px 25px -5px rgba(15, 23, 42, 0.1),
+    0 10px 10px -5px rgba(15, 23, 42, 0.04);
+  --shadow-glow: 0 8px 20px -6px rgba(79, 70, 229, 0.6); /* Colored glow for buttons */
+
+  /* Motion */
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =========================================
+   2. GLOBAL TYPOGRAPHY & ANIMATIONS
+========================================= */
+body {
+  font-family: var(--font-family-main);
+  background-color: var(--bg-main);
+  color: var(--text-dark);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Page Entrance Animation */
+@keyframes fadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Apply entrance animation to main layout wrappers */
+.container,
+.container-fluid {
+  animation: fadeSlideUp 0.5s ease-out forwards;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-dark);
+}
+
+/* =========================================
+   3. COMPONENTS STYLING & PHYSICS
+========================================= */
+
+/* Glassmorphism Navbar */
+.navbar {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background-color: rgba(255, 255, 255, 0.85) !important; /* Semi-transparent */
+  -webkit-backdrop-filter: blur(12px); /* Blur effect behind navbar */
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6) !important;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-smooth);
+}
+
+/* Cards - Floating Physics */
+.card {
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: var(--border-radius-md) !important;
+  background-color: var(--bg-card);
+  box-shadow: var(--shadow-md) !important;
+  transition:
+    transform var(--transition-smooth),
+    box-shadow var(--transition-smooth);
+}
+
+.card:hover {
+  transform: translateY(-5px); /* Floats up on hover */
+  box-shadow: var(--shadow-hover) !important;
+}
+
+/* Form Inputs - Smooth Focus */
+.form-control,
+.form-select {
+  padding: 0.8rem 1.2rem;
+  border-radius: var(--border-radius-sm);
+  border: 2px solid transparent;
+  background-color: #f8fafc;
+  font-size: 0.95rem;
+  transition: all var(--transition-fast);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: #ffffff;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15); /* Soft focus ring */
+}
+
+/* Primary Buttons - Gradients & Glows */
+.btn-primary {
+  background: var(--gradient-primary) !important;
+  border: none !important;
+  border-radius: var(--border-radius-sm);
+  padding: 0.7rem 1.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: white;
+  box-shadow: var(--shadow-glow);
+  transition: all var(--transition-fast);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.02); /* Slight pop effect */
+  box-shadow: 0 12px 25px -6px rgba(79, 70, 229, 0.7); /* Stronger glow */
+}
+
+/* Outline Buttons */
+.btn-outline-primary {
+  color: var(--primary-color) !important;
+  border: 2px solid var(--primary-color) !important;
+  background: transparent !important;
+  font-weight: 600;
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-outline-primary:hover {
+  background: var(--gradient-primary) !important;
+  border-color: transparent !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Sidebar Links Hover Effect */
+.nav-pills .nav-link {
+  transition: all var(--transition-fast);
+  border-radius: var(--border-radius-sm);
+}
+
+.nav-pills .nav-link:hover:not(.bg-primary) {
+  background-color: #f1f5f9;
+  transform: translateX(4px); /* Slides slightly right on hover */
+  color: var(--primary-color) !important;
+}
+
+/* =========================================
+   4. LAYOUT UTILITIES (Unchanged Format)
+========================================= */
+.sidebar-height {
+  min-height: calc(100vh - 72px);
+  background-color: white !important;
+}
+
+.cover-image {
+  height: 240px;
+  object-fit: cover;
+  width: 100%;
+  border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+}
+
+.avatar-profile {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border: 6px solid white;
+  margin-top: -70px;
+  position: relative;
+  z-index: 2;
+  transition: transform var(--transition-smooth);
+}
+
+.avatar-profile:hover {
+  transform: scale(1.05); /* Avatar pops slightly on hover */
+}

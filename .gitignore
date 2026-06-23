@@ -1,0 +1,16 @@
+# Eclipse
+Taskora Backend/.metadata/
+Taskora Backend/.settings/
+Taskora Backend/.classpath
+Taskora Backend/.project
+
+# Node
+node_modules/
+taskora-frontend/node_modules/
+
+# Java
+target/
+bin/
+
+# Logs
+*.log
