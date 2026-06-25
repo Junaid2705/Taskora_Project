@@ -39,6 +39,26 @@ class ProfileService {
       headers: { ...authHeader(), 'Content-Type': 'multipart/form-data' }
     });
   }
+
+  // --- NEW PORTFOLIO METHODS ---
+
+  // Get the user's portfolio gallery
+  getPortfolio() {
+    return axios.get(API_URL + 'portfolio', { headers: authHeader() });
+  }
+
+  // Add a new project (Requires multipart/form-data for the image)
+  addPortfolioItem(title, description, projectUrl, file) {
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('projectUrl', projectUrl);
+    formData.append('file', file);
+    
+    return axios.post(API_URL + 'portfolio', formData, {
+      headers: { ...authHeader(), 'Content-Type': 'multipart/form-data' }
+    });
+  }
 }
 
 export default new ProfileService();

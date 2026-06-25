@@ -208,3 +208,82 @@ h6 {
 .avatar-profile:hover {
   transform: scale(1.05); /* Avatar pops slightly on hover */
 }
+/* Add this to your index.css */
+.brand-logo-hover {
+  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
+}
+
+.brand-logo-hover:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+/* =========================================
+   TASKORA GLOBAL UI ENHANCEMENTS
+   ========================================= */
+
+/* 1. Animated Gradient Background (Replaces plain white) */
+body {
+  background: linear-gradient(-45deg, #f8f9fa, #e9ecef, #f1f3f5, #ffffff);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  min-height: 100vh;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 2. Global Fade-In Animation for all new pages */
+.fade-in {
+  animation: fadeInAnimation 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeInAnimation {
+  0% { opacity: 0; transform: translateY(15px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* 3. The "Hover Lift" Physics for Cards */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease !important;
+  border: 1px solid rgba(255,255,255,0.8);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.08) !important;
+}
+
+/* 4. Glassmorphism effect for Sidebar & Navbar */
+.bg-white {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* 5. Modern Button Physics */
+.btn {
+  -o-transition: all 0.2s ease-in-out !important;
+  letter-spacing: 0.3px;
+  -webkit-transition: all 0.2s ease-in-out !important;
+  -moz-transition: all 0.2s ease-in-out !important;
+  -ms-transition: all 0.2s ease-in-out !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.btn:hover {
+  transform: scale(1.03);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+/* Make inputs look highly premium on focus */
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+  background-color: #fff;
+}

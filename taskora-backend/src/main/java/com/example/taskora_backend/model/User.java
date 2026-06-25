@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -58,6 +59,9 @@ public class User {
 
     @Column(name = "cover_url")
     private String coverUrl;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PortfolioItem> portfolioItems = new ArrayList<>();
 
     @Column(columnDefinition = "TEXT")
     private String bio;

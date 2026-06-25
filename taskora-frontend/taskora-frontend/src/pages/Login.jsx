@@ -14,6 +14,9 @@ const Login = () => {
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
 
+  // --- NEW: State for Password Visibility Toggle ---
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -42,7 +45,10 @@ const Login = () => {
     <div className="container py-5">
       <div className="row justify-content-center">
         <div className="col-md-7 col-lg-5 col-xl-4">
-          <div className="card border-0 mt-4 p-2">
+          <div
+            className="card border-0 mt-4 p-2 shadow-sm"
+            style={{ borderRadius: "15px" }}
+          >
             <div className="card-body p-4 p-md-5">
               <div className="text-center mb-4">
                 <h3 className="fw-bold text-dark">Welcome Back</h3>
@@ -94,16 +100,29 @@ const Login = () => {
                       Forgot Password?
                     </a>
                   </div>
-                  <input
-                    type="password"
-                    name="password"
-                    className="form-control mt-2"
-                    id="password"
-                    placeholder="Enter your password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                  />
+
+                  {/* --- NEW: Password Input Group with Toggle --- */}
+                  <div className="input-group mt-2">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      className="form-control"
+                      id="password"
+                      placeholder="Enter your password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                    />
+                    <button
+                      className="btn d-flex align-items-center justify-content-center"
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      title={showPassword ? "Hide password" : "Show password"}
+                      style={{ fontSize: "1.2rem", padding: "0 0.75rem" }}
+                    >
+                      {showPassword ? "🙈" : "👁️"}
+                    </button>
+                  </div>
                 </div>
 
                 <button

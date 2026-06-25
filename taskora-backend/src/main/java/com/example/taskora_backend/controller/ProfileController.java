@@ -1,5 +1,6 @@
 package com.example.taskora_backend.controller;
 
+import com.example.taskora_backend.model.PortfolioItem;
 import com.example.taskora_backend.model.User;
 import com.example.taskora_backend.repository.UserRepository;
 import com.example.taskora_backend.security.UserDetailsImpl;
@@ -108,5 +109,52 @@ public class ProfileController {
         userRepository.save(user);
         
         return ResponseEntity.ok(Map.of("message", "Profile updated successfully!"));
+    }
+    
+ // --- ADD A NEW PORTFOLIO PROJECT ---
+    @PostMapping("/portfolio")
+    public ResponseEntity<?> addPortfolioItem(
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("projectUrl") String projectUrl,
+            @RequestParam("file") MultipartFile file) {
+        
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            User user = userRepository.findById(userDetails.getId()).orElseThrow();
+
+            // 1. Save the image to the uploads folder
+            String fileName = "portfolio_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) { Files.createDirectories(uploadPath); }
+            Files.copy(file.getInputStream(), uploadPath.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+            String fileUrl = "http://localhost:8080/uploads/" + fileName;
+
+            // 2. Create and save the new portfolio item
+            PortfolioItem item = new PortfolioItem();
+            item.setTitle(title);
+            item.setDescription(description);
+            item.setProjectUrl(projectUrl);
+            item.setImageUrl(fileUrl);
+            item.setUser(user);
+            
+            user.getPortfolioItems().add(item);
+            userRepository.save(user); // Cascade will save the item
+
+            return ResponseEntity.ok(Map.of("message", "Project added to portfolio successfully!", "imageUrl", fileUrl));
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Could not upload project image."));
+        }
+    }
+
+    // --- GET THE USER'S PORTFOLIO ---
+    @GetMapping("/portfolio")
+    public ResponseEntity<?> getMyPortfolio() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        User user = userRepository.findById(userDetails.getId()).orElseThrow();
+        
+        return ResponseEntity.ok(user.getPortfolioItems());
     }
 }

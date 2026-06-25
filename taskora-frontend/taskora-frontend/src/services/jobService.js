@@ -50,6 +50,11 @@ class JobService {
   getMyApplications() {
     return axios.get(API_URL + 'applications/my-applications', { headers: authHeader() });
   }
+
+  // Employer: Accept a freelancer's application
+  acceptApplication(applicationId) {
+    return axios.put(API_URL + `applications/${applicationId}/accept`, {}, { headers: authHeader() });
+  }
 }
 
 export default new JobService();

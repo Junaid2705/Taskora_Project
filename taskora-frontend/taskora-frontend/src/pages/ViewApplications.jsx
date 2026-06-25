@@ -40,39 +40,56 @@ const ViewApplications = () => {
         </div>
       )}
 
+      {/* Replace your existing applications map with this */}
       <div className="row g-4">
         {applications.map((app) => (
           <div className="col-12" key={app.applicationId}>
-            <div className="card shadow-sm border-0">
-              <div className="card-body p-4">
+            <div className="card shadow-sm border-0 hover-lift">
+              <div className="card-body p-4 p-md-5">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <h5 className="fw-bold text-primary mb-0">
-                    <i className="bi bi-person-circle me-2"></i> {app.freelancer?.fullName}
+                    <img src={app.freelancer?.avatarUrl || "https://via.placeholder.com/40"} alt="avatar" className="rounded-circle me-2" style={{width: '40px', height: '40px', objectFit: 'cover'}} />
+                    {app.freelancer?.fullName}
                   </h5>
-                  <span className={`badge ${app.status === 'PENDING' ? 'bg-warning text-dark' : 'bg-success'}`}>
+                  <span className={`badge px-3 py-2 rounded-pill ${app.status === 'PENDING' ? 'bg-warning text-dark' : 'bg-success'}`}>
                     {app.status}
                   </span>
                 </div>
                 
-                <h6 className="fw-bold">Proposal:</h6>
-                <p className="bg-light p-3 rounded border text-muted" style={{ whiteSpace: 'pre-wrap' }}>
+                <h6 className="fw-bold text-dark mt-4">Proposal:</h6>
+                <p className="bg-light p-4 rounded border-0 text-muted" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.8' }}>
                   {app.coverLetter}
                 </p>
 
-                <div className="row align-items-center mt-3">
+                <div className="row align-items-center mt-4">
                   <div className="col-md-4">
-                    <strong>Expected Salary: </strong> <span className="text-success fw-bold">${app.expectedSalary}</span>
+                    <span className="text-muted d-block small">Expected Budget</span>
+                    <span className="text-success fw-bold fs-5">${app.expectedSalary}</span>
                   </div>
-                  <div className="col-md-4">
-                    <strong>Applied On: </strong> {new Date(app.appliedAt).toLocaleDateString()}
+                  <div className="col-md-4 text-md-center">
+                    <span className="text-muted d-block small">Applied On</span>
+                    <span className="fw-medium">{new Date(app.appliedAt).toLocaleDateString()}</span>
                   </div>
-                  <div className="col-md-4 text-md-end mt-3 mt-md-0">
+                  <div className="col-md-4 text-md-end mt-3 mt-md-0 d-flex justify-content-md-end gap-2">
                     {app.resumeUrl && (
-                      <a href={app.resumeUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-info me-2">
-                        View Portfolio
+                      <a href={app.resumeUrl} target="_blank" rel="noreferrer" className="btn btn-outline-primary fw-bold rounded-pill">
+                        Portfolio
                       </a>
                     )}
-                    <button className="btn btn-sm btn-success">Accept</button>
+                    
+                    {/* FIX #3: THE ACCEPT BUTTON API CALL */}
+                    {app.status === 'PENDING' && (
+                      <button 
+                        className="btn btn-success fw-bold px-4 rounded-pill shadow-sm"
+                        onClick={() => {
+                          JobService.acceptApplication(app.applicationId).then(() => {
+                            window.location.reload(); // Quick refresh to update status
+                          });
+                        }}
+                      >
+                        Accept Bid
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
