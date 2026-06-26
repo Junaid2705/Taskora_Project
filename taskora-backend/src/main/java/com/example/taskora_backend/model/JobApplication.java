@@ -46,11 +46,11 @@ public class JobApplication {
     @Column(name = "applied_at", updatable = false)
     private LocalDateTime appliedAt;
 
-    // --- FIX 2: Ensures JobApplication.ApplicationStatus.PENDING works ---
+    // --- Application status aligned with the DB schema / DB Design doc ---
     public enum ApplicationStatus {
         PENDING,
-        REVIEWING,
-        ACCEPTED,
-        REJECTED
+        SHORTLISTED,
+        REJECTED,
+        HIRED
     }
 }

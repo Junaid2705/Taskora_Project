@@ -14,4 +14,7 @@ public class JobRequest {
     private String location;
     private LocalDate deadline; 
     private Long categoryId;
+
+    // Optional: "OPEN" or "CLOSED". Used on update; defaults to OPEN on create.
+    private String status;
 }

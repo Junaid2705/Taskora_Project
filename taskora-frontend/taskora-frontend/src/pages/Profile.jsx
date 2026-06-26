@@ -1,408 +1,248 @@
-import React, { useState, useEffect, useRef } from "react";
-import ProfileService from "../services/profileService";
+import React, { useEffect, useRef, useState } from 'react';
+import ProfileService from '../services/profileService';
+import Avatar from '../components/Avatar';
+import { getCurrentUser } from '../services/auth';
 
 const Profile = () => {
-  // --- STATE ---
-  const [profile, setProfile] = useState({
-    fullName: "",
-    role: "",
-    bio: "",
-    portfolioUrl: "",
-    avatarUrl: "",
-    coverUrl: "",
-  });
-  const [portfolioItems, setPortfolioItems] = useState([]); // New state for the gallery
+  const [p, setP] = useState(null);
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({});
+  const [msg, setMsg] = useState('');
+  const [portfolio, setPortfolio] = useState([]);
+  const [pwd, setPwd] = useState({ currentPassword: '', newPassword: '' });
+  const [pwdMsg, setPwdMsg] = useState('');
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [usernameMsg, setUsernameMsg] = useState('');
+  const avatarRef = useRef();
+  const coverRef = useRef();
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [isAddingProject, setIsAddingProject] = useState(false); // Toggle for project form
-  const [message, setMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const load = () => ProfileService.getProfile().then((r) => { setP(r.data); setForm(r.data); });
 
-  // New Project Form State
-  const [newProject, setNewProject] = useState({
-    title: "",
-    description: "",
-    projectUrl: "",
-    file: null,
-  });
-
-  const coverInputRef = useRef(null);
-  const avatarInputRef = useRef(null);
-
-  // --- LIFECYCLE ---
   useEffect(() => {
-    // Load both the user profile AND their portfolio items
-    Promise.all([
-      ProfileService.getProfile(),
-      ProfileService.getPortfolio(),
-    ]).then(
-      ([profileRes, portfolioRes]) => {
-        setProfile(profileRes.data);
-        setPortfolioItems(portfolioRes.data);
-        setIsLoading(false);
-      },
-      (error) => {
-        console.error("Error loading profile data", error);
-        setIsLoading(false);
-      },
-    );
+    load();
+    ProfileService.getPortfolio().then((r) => setPortfolio(r.data)).catch(() => {});
   }, []);
 
-  // --- HANDLERS ---
-  const handleTextChange = (e) =>
-    setProfile({ ...profile, [e.target.name]: e.target.value });
+  const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const saveTextUpdates = (e) => {
+  const save = async (e) => {
     e.preventDefault();
-    ProfileService.updateProfile({
-      bio: profile.bio,
-      portfolioUrl: profile.portfolioUrl,
-    }).then(() => {
-      setMessage("Profile updated successfully!");
-      setIsEditing(false);
-      setTimeout(() => setMessage(""), 3000);
-    });
+    setMsg('');
+    try {
+      const r = await ProfileService.updateProfile(form);
+      setP(r.data); setForm(r.data); setEditing(false); setMsg('Profile updated!');
+      setTimeout(() => setMsg(''), 2500);
+    } catch { setMsg('Could not save profile.'); }
   };
 
-  const handleImageUpload = (e, type) => {
-    const file = e.target.files[0];
+  const cacheAvatar = (url) => {
+    const u = getCurrentUser();
+    if (u) { u.avatar = url; localStorage.setItem('user', JSON.stringify(u)); }
+  };
+
+  const upload = async (e, type) => {
+    const file = e.target.files && e.target.files[0];
     if (!file) return;
-
-    if (type === "avatar") {
-      ProfileService.uploadAvatar(file).then((res) =>
-        setProfile({ ...profile, avatarUrl: res.data.url }),
-      );
-    } else {
-      ProfileService.uploadCover(file).then((res) =>
-        setProfile({ ...profile, coverUrl: res.data.url }),
-      );
+    setMsg('');
+    try {
+      const r = type === 'avatar' ? await ProfileService.uploadAvatar(file) : await ProfileService.uploadCover(file);
+      if (type === 'avatar') cacheAvatar(r.data.url);
+      await load();
+      setMsg(`${type === 'avatar' ? 'Avatar' : 'Cover'} updated!`);
+      setTimeout(() => setMsg(''), 2500);
+    } catch (err) {
+      setMsg(err.response?.data?.error || 'Upload failed. Please try a JPG/PNG under 10MB.');
+    } finally {
+      e.target.value = ''; // allow re-selecting the same file
     }
   };
 
-  // Portfolio Specific Handlers
-  const handleProjectChange = (e) =>
-    setNewProject({ ...newProject, [e.target.name]: e.target.value });
-  const handleProjectFile = (e) =>
-    setNewProject({ ...newProject, file: e.target.files[0] });
-
-  const saveNewProject = (e) => {
+  const changePassword = async (e) => {
     e.preventDefault();
-    if (!newProject.file) {
-      setMessage("Please select an image for your project.");
-      return;
+    setPwdMsg('');
+    try {
+      await ProfileService.changePassword(pwd.currentPassword, pwd.newPassword);
+      setPwdMsg('success');
+      setPwd({ currentPassword: '', newPassword: '' });
+    } catch (e2) {
+      setPwdMsg(e2.response?.data?.error || 'Could not change password.');
     }
-
-    ProfileService.addPortfolioItem(
-      newProject.title,
-      newProject.description,
-      newProject.projectUrl,
-      newProject.file,
-    )
-      .then((res) => {
-        // Refresh the portfolio list dynamically
-        setPortfolioItems([
-          ...portfolioItems,
-          { ...newProject, imageUrl: res.data.imageUrl },
-        ]);
-        setIsAddingProject(false);
-        setNewProject({
-          title: "",
-          description: "",
-          projectUrl: "",
-          file: null,
-        });
-        setMessage("Project added successfully!");
-        setTimeout(() => setMessage(""), 3000);
-      })
-      .catch(() => setMessage("Failed to upload project. Check file size."));
   };
 
-  if (isLoading)
-    return (
-      <div className="text-center mt-5">
-        <div className="spinner-border text-primary"></div>
-      </div>
-    );
+  const changeUsername = async () => {
+    setUsernameMsg('');
+    if (!newUsername.trim()) return;
+    try {
+      const r = await ProfileService.changeUsername(newUsername.trim());
+      setUsernameMsg('success');
+      setEditingUsername(false);
+      const u = getCurrentUser();
+      if (u) { u.username = r.data.username; localStorage.setItem('user', JSON.stringify(u)); }
+      await load();
+      setTimeout(() => setUsernameMsg(''), 2500);
+    } catch (e2) {
+      setUsernameMsg(e2.response?.data?.message || e2.response?.data?.error || 'Could not change username.');
+    }
+  };
 
-  const defaultGradient =
-    "linear-gradient(to right, #ff7e5f, #feb47b, #86a8e7, #91eae4)";
+  const deletePortfolioItem = async (id) => {
+    if (!window.confirm('Delete this portfolio item?')) return;
+    try {
+      await ProfileService.deletePortfolioItem(id);
+      setPortfolio((prev) => prev.filter((item) => item.id !== id));
+    } catch { /* ignore */ }
+  };
+
+  if (!p) return <div className="text-center py-5"><div className="spinner-border text-primary" /></div>;
+
+  const skills = (p.skills || '').split(',').map((s) => s.trim()).filter(Boolean);
+  const location = [p.city, p.state, p.country].filter(Boolean).join(', ');
 
   return (
-    <div
-      className="container py-4 fade-in"
-      style={{ position: "relative", zIndex: 9999 }}
-    >
-      {message && (
-        <div
-          className={`alert ${message.includes("Failed") || message.includes("Please") ? "alert-danger" : "alert-success"} shadow-sm`}
-        >
-          {message}
+    <div style={{ maxWidth: 900 }}>
+      {msg && <div className="alert alert-success py-2 small">{msg}</div>}
+
+      {/* Header card */}
+      <div className="tk-card overflow-hidden mb-3">
+        <div style={{ height: 160, background: p.coverImage ? `url(${p.coverImage}) center/cover` : 'linear-gradient(120deg,#2563eb,#60a5fa)', position: 'relative' }}>
+          <button className="btn btn-sm btn-light position-absolute" style={{ top: 12, right: 12 }} onClick={() => coverRef.current.click()}>
+            <i className="bi bi-camera"></i> Cover
+          </button>
+          <input type="file" accept="image/*" ref={coverRef} hidden onChange={(e) => upload(e, 'cover')} />
         </div>
-      )}
-
-      {/* --- TOP PROFILE CARD --- */}
-      <div
-        className="card shadow-sm border-0 mb-4"
-        style={{ borderRadius: "15px" }}
-      >
-        <div
-          className="position-relative w-100 m-0"
-          onClick={() => coverInputRef.current.click()}
-          style={{ cursor: "pointer" }}
-          title="Change cover"
-        >
-          <div
-            style={{
-              height: "250px",
-              background: profile.coverUrl
-                ? `url(${profile.coverUrl}) center/cover`
-                : defaultGradient,
-              borderTopLeftRadius: "15px",
-              borderTopRightRadius: "15px",
-            }}
-          ></div>
-          <input
-            ref={coverInputRef}
-            type="file"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={(e) => handleImageUpload(e, "cover")}
-          />
-        </div>
-
-        <div className="card-body position-relative px-4 px-md-5 pb-5">
-          <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-end">
-            <div className="d-flex flex-column">
-              <div
-                style={{ marginTop: "-80px", zIndex: 10, cursor: "pointer" }}
-                onClick={() => avatarInputRef.current.click()}
-                title="Change avatar"
-              >
-                <img
-                  src={profile.avatarUrl || "https://via.placeholder.com/150"}
-                  alt="Avatar"
-                  className="rounded-circle border border-5 border-white shadow-sm"
-                  style={{
-                    width: "160px",
-                    height: "160px",
-                    objectFit: "cover",
-                    backgroundColor: "#fff",
-                  }}
-                />
-                <input
-                  ref={avatarInputRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={(e) => handleImageUpload(e, "avatar")}
-                />
+        <div className="px-4 pb-4">
+          <div className="d-flex justify-content-between align-items-end" style={{ marginTop: -40 }}>
+            <div className="position-relative">
+              <div style={{ border: '4px solid #fff', borderRadius: '50%', background: '#fff' }}>
+                <Avatar src={p.avatar} name={p.fullName || p.username} size={88} />
               </div>
-
-              <div className="mt-3">
-                <h2 className="fw-bold mb-1 text-dark">{profile.fullName}</h2>
-                <h5 className="text-secondary mb-1">
-                  {profile.role ? profile.role.replace("ROLE_", "") : ""}
-                </h5>
-              </div>
+              <button className="btn btn-sm btn-primary rounded-circle position-absolute" style={{ bottom: 4, right: 4, width: 30, height: 30, padding: 0 }}
+                onClick={() => avatarRef.current.click()}><i className="bi bi-camera"></i></button>
+              <input type="file" accept="image/*" ref={avatarRef} hidden onChange={(e) => upload(e, 'avatar')} />
             </div>
-
-            <div
-              className="d-flex gap-2 mt-3 mt-md-0 mb-md-4"
-              style={{ zIndex: 20, position: "relative" }}
-            >
-              <button
-                className="btn btn-outline-primary fw-bold px-4 rounded-pill shadow-sm"
-                onClick={() => setIsEditing(!isEditing)}
-              >
-                {isEditing ? "Cancel Edit" : "Edit Bio"}
+            <div className="d-flex gap-2">
+              <button className="btn btn-primary" onClick={() => setEditing(!editing)}>
+                {editing ? 'Cancel' : 'Edit Profile'}
               </button>
             </div>
           </div>
+          <h4 className="fw-bold mt-2 mb-0">
+            {p.fullName || p.username}
+            {p.emailVerified && <i className="bi bi-patch-check-fill text-primary ms-2" style={{ fontSize: '1rem' }}></i>}
+          </h4>
+          <div className="text-muted d-flex align-items-center gap-2">
+            @{p.username}
+            {!editingUsername && (
+              <button className="btn btn-sm btn-link text-muted p-0" onClick={() => { setEditingUsername(true); setNewUsername(p.username || ''); }}>
+                <i className="bi bi-pencil" style={{ fontSize: '0.8rem' }}></i>
+              </button>
+            )}
+          </div>
+          {editingUsername && (
+            <div className="d-flex align-items-center gap-2 mt-1">
+              <input className="form-control form-control-sm" style={{ maxWidth: 200 }} value={newUsername} onChange={(e) => setNewUsername(e.target.value)} placeholder="New username" />
+              <button className="btn btn-sm btn-primary" onClick={changeUsername}>Save</button>
+              <button className="btn btn-sm btn-outline-secondary" onClick={() => setEditingUsername(false)}>Cancel</button>
+            </div>
+          )}
+          {usernameMsg === 'success' && <div className="text-success small mt-1">Username changed!</div>}
+          {usernameMsg && usernameMsg !== 'success' && <div className="text-danger small mt-1">{usernameMsg}</div>}
+          <div className="text-muted">{p.headline || (p.role || '').replace('ROLE_', '')}</div>
+          {location && <div className="text-muted small mt-1"><i className="bi bi-geo-alt me-1"></i>{location}</div>}
+        </div>
+      </div>
 
-          <hr className="my-4" />
-
-          {/* --- BIO SECTION --- */}
-          <div className="row position-relative" style={{ zIndex: 20 }}>
-            <div className="col-md-12">
-              {isEditing ? (
-                <form
-                  onSubmit={saveTextUpdates}
-                  className="bg-light p-4 rounded border"
-                >
-                  <label className="form-label fw-semibold">About Me</label>
-                  <textarea
-                    className="form-control mb-3"
-                    rows="3"
-                    name="bio"
-                    value={profile.bio || ""}
-                    onChange={handleTextChange}
-                    placeholder="Keep it simple and direct..."
-                  ></textarea>
-
-                  <label className="form-label fw-semibold">
-                    Main Website Link
-                  </label>
-                  <input
-                    type="url"
-                    className="form-control mb-4"
-                    name="portfolioUrl"
-                    value={profile.portfolioUrl || ""}
-                    onChange={handleTextChange}
-                    placeholder="https://github.com/..."
-                  />
-
-                  <button
-                    type="submit"
-                    className="btn btn-success fw-bold px-5 rounded-pill shadow-sm"
-                  >
-                    Save Bio
-                  </button>
-                </form>
-              ) : (
-                <p
-                  className="text-muted"
-                  style={{ whiteSpace: "pre-wrap", lineHeight: "1.8" }}
-                >
-                  {profile.bio ||
-                    "No bio added yet. Click 'Edit Bio' to introduce yourself."}
-                </p>
+      {editing ? (
+        <div className="tk-card tk-card-pad mb-3">
+          <h6 className="fw-bold mb-3">Edit Profile</h6>
+          <form onSubmit={save}>
+            <div className="row g-3">
+              <div className="col-md-6"><label className="form-label">Full Name</label><input name="fullName" className="form-control" value={form.fullName || ''} onChange={onChange} /></div>
+              <div className="col-md-6"><label className="form-label">Headline</label><input name="headline" className="form-control" value={form.headline || ''} onChange={onChange} /></div>
+              <div className="col-12"><label className="form-label">Bio</label><textarea name="bio" rows="3" className="form-control" value={form.bio || ''} onChange={onChange} /></div>
+              <div className="col-12"><label className="form-label">Skills (comma separated)</label><input name="skills" className="form-control" value={form.skills || ''} onChange={onChange} /></div>
+              <div className="col-md-6"><label className="form-label">Experience</label><textarea name="experience" rows="2" className="form-control" value={form.experience || ''} onChange={onChange} /></div>
+              <div className="col-md-6"><label className="form-label">Education</label><textarea name="education" rows="2" className="form-control" value={form.education || ''} onChange={onChange} /></div>
+              <div className="col-md-4"><label className="form-label">City</label><input name="city" className="form-control" value={form.city || ''} onChange={onChange} /></div>
+              <div className="col-md-4"><label className="form-label">State</label><input name="state" className="form-control" value={form.state || ''} onChange={onChange} /></div>
+              <div className="col-md-4"><label className="form-label">Country</label><input name="country" className="form-control" value={form.country || ''} onChange={onChange} /></div>
+              <div className="col-md-4"><label className="form-label">Website</label><input name="website" className="form-control" value={form.website || ''} onChange={onChange} /></div>
+              <div className="col-md-4"><label className="form-label">LinkedIn</label><input name="linkedin" className="form-control" value={form.linkedin || ''} onChange={onChange} /></div>
+              <div className="col-md-4"><label className="form-label">GitHub</label><input name="github" className="form-control" value={form.github || ''} onChange={onChange} /></div>
+            </div>
+            <button className="btn btn-primary mt-3 px-4">Save Changes</button>
+          </form>
+        </div>
+      ) : (
+        <div className="row g-3">
+          <div className="col-lg-8">
+            <div className="tk-card tk-card-pad mb-3">
+              <h6 className="fw-bold">About Me</h6>
+              <p className="text-muted mb-0">{p.bio || 'No bio yet. Click Edit Profile to add one.'}</p>
+            </div>
+            {skills.length > 0 && (
+              <div className="tk-card tk-card-pad mb-3">
+                <h6 className="fw-bold">Skills</h6>
+                <div className="d-flex flex-wrap gap-2">{skills.map((s) => <span key={s} className="tk-skill">{s}</span>)}</div>
+              </div>
+            )}
+            {(p.experience || p.education) && (
+              <div className="tk-card tk-card-pad mb-3">
+                {p.experience && <><h6 className="fw-bold">Experience</h6><p className="text-muted">{p.experience}</p></>}
+                {p.education && <><h6 className="fw-bold mt-2">Education</h6><p className="text-muted mb-0">{p.education}</p></>}
+              </div>
+            )}
+            {/* Portfolio */}
+            <div className="tk-card tk-card-pad">
+              <h6 className="fw-bold mb-3">Portfolio</h6>
+              {portfolio.length === 0 ? <p className="text-muted small mb-0">No portfolio items yet.</p> : (
+                <div className="row g-3">
+                  {portfolio.map((item) => (
+                    <div className="col-6 col-md-4" key={item.id || item.title}>
+                      <div className="border rounded overflow-hidden h-100 position-relative">
+                        <button className="btn btn-sm btn-danger position-absolute" style={{ top: 4, right: 4, width: 24, height: 24, padding: 0, lineHeight: '24px', fontSize: '0.7rem' }}
+                          onClick={() => deletePortfolioItem(item.id)}>
+                          <i className="bi bi-x"></i>
+                        </button>
+                        {item.imageUrl && <img src={item.imageUrl} alt={item.title} className="w-100" style={{ height: 110, objectFit: 'cover' }} />}
+                        <div className="p-2">
+                          <div className="fw-semibold small">{item.title}</div>
+                          {item.projectUrl && <a href={item.projectUrl} target="_blank" rel="noreferrer" className="small">View</a>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* --- PORTFOLIO GALLERY SECTION --- */}
-      <div className="d-flex justify-content-between align-items-center mb-4 mt-5">
-        <h3 className="fw-bold text-dark mb-0">
-          <i className="bi bi-grid-1x2-fill text-primary me-2"></i>My Portfolio
-        </h3>
-        <button
-          className="btn btn-primary fw-bold rounded-pill shadow-sm"
-          onClick={() => setIsAddingProject(!isAddingProject)}
-        >
-          {isAddingProject ? "Cancel" : "+ Add Project"}
-        </button>
-      </div>
+          <div className="col-lg-4">
+            <div className="tk-card tk-card-pad mb-3">
+              <h6 className="fw-bold mb-3">Contact & Links</h6>
+              <div className="small"><i className="bi bi-envelope me-2 text-muted"></i>{p.email}</div>
+              {p.mobile && <div className="small mt-2"><i className="bi bi-telephone me-2 text-muted"></i>{p.mobile}</div>}
+              {p.website && <div className="small mt-2"><i className="bi bi-globe me-2 text-muted"></i><a href={p.website} target="_blank" rel="noreferrer">Website</a></div>}
+              {p.github && <div className="small mt-2"><i className="bi bi-github me-2 text-muted"></i><a href={p.github} target="_blank" rel="noreferrer">GitHub</a></div>}
+              {p.linkedin && <div className="small mt-2"><i className="bi bi-linkedin me-2 text-muted"></i><a href={p.linkedin} target="_blank" rel="noreferrer">LinkedIn</a></div>}
+            </div>
 
-      {/* Add Project Form */}
-      {isAddingProject && (
-        <div className="card shadow-sm border-0 mb-4 bg-light">
-          <div className="card-body p-4">
-            <h5 className="fw-bold mb-3">Upload New Project</h5>
-            <form onSubmit={saveNewProject}>
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <label className="form-label fw-medium">Project Title</label>
-                  <input
-                    type="text"
-                    name="title"
-                    className="form-control"
-                    value={newProject.title}
-                    onChange={handleProjectChange}
-                    required
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label fw-medium">
-                    Live URL (Optional)
-                  </label>
-                  <input
-                    type="url"
-                    name="projectUrl"
-                    className="form-control"
-                    value={newProject.projectUrl}
-                    onChange={handleProjectChange}
-                    placeholder="https://..."
-                  />
-                </div>
-                <div className="col-12">
-                  <label className="form-label fw-medium">
-                    Short Description
-                  </label>
-                  <input
-                    type="text"
-                    name="description"
-                    className="form-control"
-                    value={newProject.description}
-                    onChange={handleProjectChange}
-                    required
-                  />
-                </div>
-                <div className="col-12">
-                  <label className="form-label fw-medium">
-                    Project Screenshot
-                  </label>
-                  <input
-                    type="file"
-                    className="form-control"
-                    accept="image/*"
-                    onChange={handleProjectFile}
-                    required
-                  />
-                </div>
-                <div className="col-12 mt-4">
-                  <button
-                    type="submit"
-                    className="btn btn-success fw-bold px-4 rounded-pill"
-                  >
-                    Upload to Gallery
-                  </button>
-                </div>
-              </div>
-            </form>
+            <div className="tk-card tk-card-pad">
+              <h6 className="fw-bold mb-3">Change Password</h6>
+              {pwdMsg === 'success' && <div className="alert alert-success py-2 small">Password changed!</div>}
+              {pwdMsg && pwdMsg !== 'success' && <div className="alert alert-danger py-2 small">{pwdMsg}</div>}
+              <form onSubmit={changePassword}>
+                <input type="password" className="form-control mb-2" placeholder="Current password"
+                  value={pwd.currentPassword} onChange={(e) => setPwd({ ...pwd, currentPassword: e.target.value })} required />
+                <input type="password" className="form-control mb-3" placeholder="New password" minLength={6}
+                  value={pwd.newPassword} onChange={(e) => setPwd({ ...pwd, newPassword: e.target.value })} required />
+                <button className="btn btn-outline-primary w-100">Update Password</button>
+              </form>
+            </div>
           </div>
         </div>
       )}
-
-      {/* The Gallery Grid */}
-      <div className="row g-4 mb-5">
-        {portfolioItems.length === 0 && !isAddingProject ? (
-          <div className="col-12 text-center py-5 text-muted">
-            <i className="bi bi-images fs-1 d-block mb-2"></i>
-            <p>Your gallery is empty. Show off your best work!</p>
-          </div>
-        ) : (
-          portfolioItems.map((item, index) => (
-            <div className="col-md-6 col-lg-4" key={index}>
-              <div
-                className="card border-0 shadow-sm h-100 hover-lift overflow-hidden"
-                style={{ borderRadius: "12px" }}
-              >
-                <div
-                  style={{
-                    height: "200px",
-                    backgroundImage: `url(${item.imageUrl})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                ></div>
-                <div className="card-body d-flex flex-column">
-                  <h5 className="fw-bold text-dark">{item.title}</h5>
-                  <p className="text-muted small flex-grow-1">
-                    {item.description}
-                  </p>
-                  {item.projectUrl && (
-                    <a
-                      href={
-                        item.projectUrl.startsWith("http")
-                          ? item.projectUrl
-                          : `https://${item.projectUrl}`
-                      }
-                      target="_blank"
-                      rel="noreferrer"
-                      className="btn btn-outline-primary btn-sm fw-bold rounded-pill mt-3"
-                    >
-                      View Live Project{" "}
-                      <i className="bi bi-box-arrow-up-right ms-1"></i>
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
     </div>
   );
 };

@@ -1,30 +1,41 @@
 import axios from 'axios';
+import { authHeader } from './auth';
 
-const API_URL = 'http://localhost:8080/api/messages/';
-
-const authHeader = () => {
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (user && user.token) {
-    return { Authorization: 'Bearer ' + user.token };
-  } else {
-    return {};
-  }
-};
+const API = 'http://localhost:8081/api/';
 
 class MessageService {
-  // Get list of users we have chatted with
   getContacts() {
-    return axios.get(API_URL + 'contacts', { headers: authHeader() });
+    return axios.get(API + 'messages/contacts', { headers: authHeader() });
   }
 
-  // Get the chat history with a specific user
   getConversation(userId) {
-    return axios.get(API_URL + `conversation/${userId}`, { headers: authHeader() });
+    return axios.get(API + `messages/conversation/${userId}`, { headers: authHeader() });
   }
 
-  // Send a message to a specific user
+  // Persists + pushes over WebSocket; resolves with the saved message DTO.
   sendMessage(receiverId, content) {
-    return axios.post(API_URL + `send/${receiverId}`, { content }, { headers: authHeader() });
+    return axios.post(API + `messages/send/${receiverId}`, { content }, { headers: authHeader() });
+  }
+
+  markRead(otherUserId) {
+    return axios.put(API + `messages/read/${otherUserId}`, {}, { headers: authHeader() });
+  }
+
+  editMessage(messageId, content) {
+    return axios.put(API + `messages/${messageId}`, { content }, { headers: authHeader() });
+  }
+
+  deleteMessage(messageId) {
+    return axios.delete(API + `messages/${messageId}`, { headers: authHeader() });
+  }
+
+  getUnreadCount() {
+    return axios.get(API + 'messages/unread-count', { headers: authHeader() });
+  }
+
+  // Find people to start a new conversation with.
+  searchUsers(q) {
+    return axios.get(API + 'users/search', { params: { q }, headers: authHeader() });
   }
 }
 

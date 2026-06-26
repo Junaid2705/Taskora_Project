@@ -59,9 +59,12 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // Login & Register are public
+                .requestMatchers("/ws/**").permitAll() // WebSocket handshake (auth happens on STOMP CONNECT)
+                .requestMatchers("/uploads/**").permitAll() // Publicly serve uploaded images (avatars, covers)
+                .requestMatchers("/sitemap.xml", "/robots.txt", "/api/seo/**", "/api/settings", "/api/presence/**").permitAll()
                 
                 // --- NEW: Allow public access to Categories and Job Feed ---
-                .requestMatchers("/api/jobs/categories", "/api/jobs/feed").permitAll()
+                .requestMatchers("/api/jobs/categories", "/api/jobs/feed", "/api/jobs/search", "/api/categories/active", "/api/projects/feed", "/api/projects/search", "/api/subscriptions/count/**", "/api/subscriptions/creators", "/api/cms", "/api/cms/**").permitAll()
                 // -----------------------------------------------------------
                 
                 .anyRequest().authenticated() // Everything else (like creating a job) requires a valid JWT

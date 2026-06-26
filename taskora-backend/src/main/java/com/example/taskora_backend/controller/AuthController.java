@@ -45,17 +45,21 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
         
-        // 2. Draft and send the verification email
-        String verifyToken = jwtUtils.generateTokenFromUsername(registerRequest.getUsername());
-        String verifyLink = "http://localhost:5173/verify-email?token=" + verifyToken;
-        
-        String emailBody = "Welcome to Taskora, " + registerRequest.getFullName() + "!\n\n" +
-                           "Please verify your email address by clicking the link below:\n" +
-                           verifyLink + "\n\n" +
-                           "This link will expire soon.";
-                           
-        emailService.sendEmail(registerRequest.getEmail(), "Verify your Taskora Account", emailBody);
-        
+        // 2. Draft and send the verification email (best-effort: never fail registration on email errors)
+        try {
+            String verifyToken = jwtUtils.generateTokenFromUsername(registerRequest.getUsername());
+            String verifyLink = "http://localhost:5173/verify-email?token=" + verifyToken;
+
+            String emailBody = "Welcome to Taskora, " + registerRequest.getFullName() + "!\n\n" +
+                               "Please verify your email address by clicking the link below:\n" +
+                               verifyLink + "\n\n" +
+                               "This link will expire soon.";
+
+            emailService.sendEmail(registerRequest.getEmail(), "Verify your Taskora Account", emailBody);
+        } catch (Exception e) {
+            System.err.println("Verification email could not be sent: " + e.getMessage());
+        }
+
         return ResponseEntity.ok(response);
     }
 
@@ -112,7 +116,11 @@ public class AuthController {
                                resetLink + "\n\n" +
                                "If you did not request this, please ignore this email.";
 
-            emailService.sendEmail(user.getEmail(), "Taskora Password Reset", emailBody);
+            try {
+                emailService.sendEmail(user.getEmail(), "Taskora Password Reset", emailBody);
+            } catch (Exception e) {
+                System.err.println("Password reset email could not be sent: " + e.getMessage());
+            }
         }
 
         return ResponseEntity.ok(Map.of("message", "Password reset link sent to your email."));

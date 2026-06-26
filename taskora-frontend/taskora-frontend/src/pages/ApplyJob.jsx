@@ -1,118 +1,72 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import JobService from '../services/jobService';
+import { budgetRange } from '../lib/format';
 
 const ApplyJob = () => {
-  const { jobId } = useParams(); // Grabs the Job ID from the URL
+  const { jobId } = useParams();
   const navigate = useNavigate();
-  
-  const [formData, setFormData] = useState({
-    jobId: jobId,
-    coverLetter: '',
-    expectedSalary: '',
-    resumeUrl: ''
-  });
-  
-  const [message, setMessage] = useState('');
-  const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [job, setJob] = useState(null);
+  const [form, setForm] = useState({ coverLetter: '', expectedSalary: '', resumeUrl: '' });
+  const [err, setErr] = useState('');
+  const [ok, setOk] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  useEffect(() => {
+    JobService.getJob(jobId).then((r) => setJob(r.data)).catch(() => {});
+  }, [jobId]);
 
-  const handleSubmit = (e) => {
+  const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const onSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setMessage('');
-    setIsError(false);
-
-    JobService.applyForJob(formData).then(
-      (response) => {
-        setMessage(response.data.message);
-        setIsLoading(false);
-        // Redirect back to feed after successful application
-        setTimeout(() => navigate('/jobs'), 2000);
-      },
-      (error) => {
-        const resMessage = (error.response && error.response.data && error.response.data.error) || "Failed to submit application. Make sure you are logged in as a Freelancer.";
-        setMessage(resMessage);
-        setIsError(true);
-        setIsLoading(false);
-      }
-    );
+    setErr(''); setOk(''); setLoading(true);
+    try {
+      await JobService.applyForJob({
+        jobId: Number(jobId),
+        coverLetter: form.coverLetter,
+        expectedSalary: form.expectedSalary ? Number(form.expectedSalary) : null,
+        resumeUrl: form.resumeUrl,
+      });
+      setOk('Application submitted! Redirecting...');
+      setTimeout(() => navigate('/my-applications'), 1400);
+    } catch (e2) {
+      setErr(e2.response?.data?.error || 'Could not submit your application.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-lg-8">
-          <div className="card shadow-sm border-0">
-            <div className="card-header bg-success text-white p-4">
-              <h3 className="mb-0 fw-bold">Submit Your Proposal</h3>
-              <p className="mb-0 text-white-50">Tell the client why you are the perfect fit for this project.</p>
+    <div>
+      <h2 className="tk-page-title mb-3">Apply for Job</h2>
+      <div className="tk-card tk-card-pad" style={{ maxWidth: 720 }}>
+        {job && (
+          <div className="mb-3 pb-3 border-bottom">
+            <h5 className="fw-bold mb-1">{job.title}</h5>
+            <span className="tk-pill tk-pill-primary">{budgetRange(job.budget)}</span>
+          </div>
+        )}
+        {err && <div className="alert alert-danger py-2 small">{err}</div>}
+        {ok && <div className="alert alert-success py-2 small">{ok}</div>}
+        <form onSubmit={onSubmit}>
+          <div className="mb-3">
+            <label className="form-label">Cover Letter</label>
+            <textarea name="coverLetter" rows="6" className="form-control" placeholder="Tell the employer why you're a great fit..."
+              value={form.coverLetter} onChange={onChange} required />
+          </div>
+          <div className="row g-3">
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Expected Salary ($)</label>
+              <input type="number" name="expectedSalary" className="form-control" value={form.expectedSalary} onChange={onChange} />
             </div>
-            
-            <div className="card-body p-4 p-md-5">
-              {message && (
-                <div className={`alert ${isError ? 'alert-danger' : 'alert-success'} mb-4`} role="alert">
-                  {message}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label className="form-label fw-semibold">Cover Letter / Proposal</label>
-                  <textarea 
-                    className="form-control" 
-                    name="coverLetter" 
-                    rows="6" 
-                    value={formData.coverLetter} 
-                    onChange={handleChange} 
-                    required 
-                    placeholder="Hi! I have 4 years of experience building similar projects and I'd love to help you with this..."
-                  ></textarea>
-                </div>
-
-                <div className="row mb-4">
-                  <div className="col-md-6">
-                    <label className="form-label fw-semibold">Expected Budget / Salary ($)</label>
-                    <input 
-                      type="number" 
-                      step="0.01" 
-                      className="form-control" 
-                      name="expectedSalary" 
-                      value={formData.expectedSalary} 
-                      onChange={handleChange} 
-                      required 
-                      placeholder="e.g. 1200.00" 
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label fw-semibold">Portfolio or Resume URL (Optional)</label>
-                    <input 
-                      type="url" 
-                      className="form-control" 
-                      name="resumeUrl" 
-                      value={formData.resumeUrl} 
-                      onChange={handleChange} 
-                      placeholder="https://yourwebsite.com" 
-                    />
-                  </div>
-                </div>
-
-                <div className="d-flex justify-content-between align-items-center">
-                  <Link to="/jobs" className="text-decoration-none text-muted">
-                    <i className="bi bi-arrow-left me-1"></i> Cancel
-                  </Link>
-                  <button type="submit" className="btn btn-success fw-bold px-5 py-2" disabled={isLoading}>
-                    {isLoading ? 'Sending...' : 'Send Proposal'}
-                  </button>
-                </div>
-              </form>
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Resume URL</label>
+              <input name="resumeUrl" className="form-control" placeholder="https://..." value={form.resumeUrl} onChange={onChange} />
             </div>
           </div>
-        </div>
+          <button className="btn btn-primary px-4" disabled={loading}>{loading ? 'Submitting...' : 'Submit Application'}</button>
+        </form>
       </div>
     </div>
   );

@@ -7,12 +7,17 @@ import com.example.taskora_backend.model.User;
 import com.example.taskora_backend.repository.JobApplicationRepository;
 import com.example.taskora_backend.repository.JobRepository;
 import com.example.taskora_backend.repository.UserRepository;
+import com.example.taskora_backend.security.AuthUtils;
 import com.example.taskora_backend.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.example.taskora_backend.service.NotificationService;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +30,7 @@ public class JobApplicationController {
     private final JobApplicationRepository applicationRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     // 1. Submit an application (For Freelancers)
     @PostMapping("/apply")
@@ -53,6 +59,12 @@ public class JobApplicationController {
         application.setStatus(JobApplication.ApplicationStatus.PENDING);
 
         applicationRepository.save(application);
+
+        // Notify the employer about the new application
+        if (job.getEmployer() != null) {
+            notificationService.notify(job.getEmployer().getUserId(), "New Job Application",
+                    freelancer.getUsername() + " applied for \"" + job.getTitle() + "\".");
+        }
 
         return ResponseEntity.ok(Map.of("message", "Application submitted successfully!"));
     }
@@ -88,5 +100,38 @@ public class JobApplicationController {
 
         List<JobApplication> myApplications = applicationRepository.findByFreelancer(freelancer);
         return ResponseEntity.ok(myApplications);
+    }
+
+    // 4. Update an application's status (For Employers who own the job)
+    //    Accepted values: PENDING, REVIEWING, ACCEPTED, REJECTED
+    @PutMapping("/{applicationId}/status")
+    public ResponseEntity<?> updateApplicationStatus(@PathVariable Long applicationId,
+                                                     @RequestBody Map<String, String> payload) {
+        JobApplication application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found."));
+
+        // Only the employer who posted the job may change its applications
+        if (application.getJob().getEmployer() == null
+                || !application.getJob().getEmployer().getUserId().equals(AuthUtils.currentUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only manage applications for your own jobs.");
+        }
+
+        String statusValue = payload.get("status");
+        if (statusValue == null || statusValue.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status is required.");
+        }
+
+        JobApplication.ApplicationStatus newStatus;
+        try {
+            newStatus = JobApplication.ApplicationStatus.valueOf(statusValue.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid status. Use PENDING, SHORTLISTED, REJECTED or HIRED.");
+        }
+
+        application.setStatus(newStatus);
+        applicationRepository.save(application);
+
+        return ResponseEntity.ok(Map.of("message", "Application status updated to " + newStatus.name() + "."));
     }
 }

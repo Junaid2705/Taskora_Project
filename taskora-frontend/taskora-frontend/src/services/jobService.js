@@ -1,59 +1,58 @@
 import axios from 'axios';
+import { authHeader } from './auth';
 
-const API_URL = 'http://localhost:8080/api/';
-
-// Helper function to grab the JWT token for protected routes
-const authHeader = () => {
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (user && user.token) {
-    return { Authorization: 'Bearer ' + user.token };
-  } else {
-    return {};
-  }
-};
+const API = 'http://localhost:8081/api/';
 
 class JobService {
-  // ==========================================
-  // JOB BOARD ENDPOINTS
-  // ==========================================
-
-  // Public Endpoint: Get dropdown categories
+  // ---------- Categories ----------
   getCategories() {
-    return axios.get(API_URL + 'jobs/categories');
+    return axios.get(API + 'categories/active');
   }
 
-  // Public Endpoint: Get all open jobs
+  // ---------- Jobs ----------
   getJobFeed() {
-    return axios.get(API_URL + 'jobs/feed');
+    return axios.get(API + 'jobs/feed');
   }
 
-  // Protected Endpoint: Post a new job (Requires Token)
-  createJob(jobData) {
-    return axios.post(API_URL + 'jobs/create', jobData, { headers: authHeader() });
+  searchJobs(params) {
+    return axios.get(API + 'jobs/search', { params });
   }
 
-  // ==========================================
-  // APPLICATION ENDPOINTS
-  // ==========================================
-
-  // Freelancer: Submit an application
-  applyForJob(applicationData) {
-    return axios.post(API_URL + 'applications/apply', applicationData, { headers: authHeader() });
+  getJob(id) {
+    return axios.get(API + `jobs/${id}`, { headers: authHeader() });
   }
 
-  // Employer: View who applied to a specific job
+  getMyJobs() {
+    return axios.get(API + 'jobs/my-jobs', { headers: authHeader() });
+  }
+
+  createJob(data) {
+    return axios.post(API + 'jobs/create', data, { headers: authHeader() });
+  }
+
+  updateJob(id, data) {
+    return axios.put(API + `jobs/${id}`, data, { headers: authHeader() });
+  }
+
+  deleteJob(id) {
+    return axios.delete(API + `jobs/${id}`, { headers: authHeader() });
+  }
+
+  // ---------- Applications ----------
+  applyForJob(data) {
+    return axios.post(API + 'applications/apply', data, { headers: authHeader() });
+  }
+
   getJobApplications(jobId) {
-    return axios.get(API_URL + `applications/job/${jobId}`, { headers: authHeader() });
+    return axios.get(API + `applications/job/${jobId}`, { headers: authHeader() });
   }
 
-  // Freelancer: View jobs I have applied to
   getMyApplications() {
-    return axios.get(API_URL + 'applications/my-applications', { headers: authHeader() });
+    return axios.get(API + 'applications/my-applications', { headers: authHeader() });
   }
 
-  // Employer: Accept a freelancer's application
-  acceptApplication(applicationId) {
-    return axios.put(API_URL + `applications/${applicationId}/accept`, {}, { headers: authHeader() });
+  updateApplicationStatus(applicationId, status) {
+    return axios.put(API + `applications/${applicationId}/status`, { status }, { headers: authHeader() });
   }
 }
 

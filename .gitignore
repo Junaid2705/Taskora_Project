@@ -6,11 +6,30 @@ Taskora Backend/.project
 
 # Node
 node_modules/
-taskora-frontend/node_modules/
+**/node_modules/
 
 # Java
 target/
+**/target/
 bin/
+
+# Build output
+dist/
+**/dist/
+
+# Uploads (user-generated content)
+uploads/
+**/uploads/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
 
 # Logs
 *.log
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,102 +1,74 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import JobService from '../services/jobService';
+import Avatar from '../components/Avatar';
+import { timeAgo, statusPill, money } from '../lib/format';
+
+const STATUSES = ['PENDING', 'SHORTLISTED', 'HIRED', 'REJECTED'];
 
 const ViewApplications = () => {
   const { jobId } = useParams();
-  const [applications, setApplications] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [apps, setApps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
 
-  useEffect(() => {
-    JobService.getJobApplications(jobId).then(
-      (response) => {
-        setApplications(response.data);
-        setIsLoading(false);
-      },
-      (error) => {
-        setError('Failed to load applications. Make sure you are the employer who posted this job.');
-        setIsLoading(false);
-      }
-    );
-  }, [jobId]);
+  const load = () => {
+    setLoading(true);
+    JobService.getJobApplications(jobId)
+      .then((r) => setApps(r.data))
+      .catch(() => setErr('Could not load applications (you may not own this job).'))
+      .finally(() => setLoading(false));
+  };
+  useEffect(load, [jobId]);
+
+  const changeStatus = async (id, status) => {
+    try {
+      await JobService.updateApplicationStatus(id, status);
+      setApps((prev) => prev.map((a) => (a.applicationId === id ? { ...a, status } : a)));
+    } catch { alert('Could not update status.'); }
+  };
 
   return (
-    <div className="container py-5">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-bold text-dark mb-0">Applicant Inbox</h2>
-        <Link to="/jobs" className="btn btn-outline-secondary">Back to Jobs</Link>
-      </div>
+    <div>
+      <Link to="/my-jobs" className="d-inline-flex align-items-center gap-1 mb-3 fw-semibold">
+        <i className="bi bi-arrow-left"></i> Back to My Jobs
+      </Link>
+      <h2 className="tk-page-title mb-3">Applicants</h2>
 
-      {isLoading && <div className="text-center mt-5"><div className="spinner-border text-primary" role="status"></div></div>}
-      
-      {error && <div className="alert alert-danger text-center">{error}</div>}
-
-      {!isLoading && !error && applications.length === 0 && (
-        <div className="text-center py-5 bg-light rounded shadow-sm border mt-4">
-          <i className="bi bi-inbox text-muted" style={{ fontSize: '3rem' }}></i>
-          <h4 className="mt-3 text-dark">No applications yet</h4>
-          <p className="text-muted">Proposals will appear here once freelancers apply.</p>
-        </div>
-      )}
-
-      {/* Replace your existing applications map with this */}
-      <div className="row g-4">
-        {applications.map((app) => (
-          <div className="col-12" key={app.applicationId}>
-            <div className="card shadow-sm border-0 hover-lift">
-              <div className="card-body p-4 p-md-5">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="fw-bold text-primary mb-0">
-                    <img src={app.freelancer?.avatarUrl || "https://via.placeholder.com/40"} alt="avatar" className="rounded-circle me-2" style={{width: '40px', height: '40px', objectFit: 'cover'}} />
-                    {app.freelancer?.fullName}
-                  </h5>
-                  <span className={`badge px-3 py-2 rounded-pill ${app.status === 'PENDING' ? 'bg-warning text-dark' : 'bg-success'}`}>
-                    {app.status}
-                  </span>
-                </div>
-                
-                <h6 className="fw-bold text-dark mt-4">Proposal:</h6>
-                <p className="bg-light p-4 rounded border-0 text-muted" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.8' }}>
-                  {app.coverLetter}
-                </p>
-
-                <div className="row align-items-center mt-4">
-                  <div className="col-md-4">
-                    <span className="text-muted d-block small">Expected Budget</span>
-                    <span className="text-success fw-bold fs-5">${app.expectedSalary}</span>
+      {loading ? (
+        <div className="text-center py-5"><div className="spinner-border text-primary" /></div>
+      ) : err ? (
+        <div className="tk-card tk-empty"><i className="bi bi-exclamation-circle d-block mb-2"></i>{err}</div>
+      ) : apps.length === 0 ? (
+        <div className="tk-card tk-empty"><i className="bi bi-people d-block mb-2"></i>No applications yet.</div>
+      ) : (
+        <div className="d-flex flex-column gap-3">
+          {apps.map((a) => (
+            <div key={a.applicationId} className="tk-card tk-card-pad">
+              <div className="d-flex gap-3">
+                <Avatar src={a.freelancer?.avatar} name={a.freelancer?.fullName || a.freelancer?.username} size={48} />
+                <div className="flex-grow-1">
+                  <div className="d-flex justify-content-between align-items-start gap-2">
+                    <div>
+                      <div className="fw-bold">{a.freelancer?.fullName || a.freelancer?.username}</div>
+                      <div className="text-muted small">Applied {timeAgo(a.appliedAt)}{a.expectedSalary ? ` · Expects ${money(a.expectedSalary)}` : ''}</div>
+                    </div>
+                    <span className={`tk-pill ${statusPill(a.status)}`}>{a.status}</span>
                   </div>
-                  <div className="col-md-4 text-md-center">
-                    <span className="text-muted d-block small">Applied On</span>
-                    <span className="fw-medium">{new Date(app.appliedAt).toLocaleDateString()}</span>
-                  </div>
-                  <div className="col-md-4 text-md-end mt-3 mt-md-0 d-flex justify-content-md-end gap-2">
-                    {app.resumeUrl && (
-                      <a href={app.resumeUrl} target="_blank" rel="noreferrer" className="btn btn-outline-primary fw-bold rounded-pill">
-                        Portfolio
-                      </a>
-                    )}
-                    
-                    {/* FIX #3: THE ACCEPT BUTTON API CALL */}
-                    {app.status === 'PENDING' && (
-                      <button 
-                        className="btn btn-success fw-bold px-4 rounded-pill shadow-sm"
-                        onClick={() => {
-                          JobService.acceptApplication(app.applicationId).then(() => {
-                            window.location.reload(); // Quick refresh to update status
-                          });
-                        }}
-                      >
-                        Accept Bid
-                      </button>
-                    )}
+                  {a.coverLetter && <p className="text-muted small mt-2 mb-2" style={{ whiteSpace: 'pre-wrap' }}>{a.coverLetter}</p>}
+                  <div className="d-flex flex-wrap gap-2 align-items-center">
+                    {a.resumeUrl && <a href={a.resumeUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary"><i className="bi bi-file-earmark-text me-1"></i>Resume</a>}
+                    <select className="form-select form-select-sm w-auto" value={a.status}
+                      onChange={(e) => changeStatus(a.applicationId, e.target.value)}>
+                      {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

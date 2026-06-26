@@ -11,4 +11,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     
     // Find all categories that are currently active
     List<Category> findByStatusTrue();
+
+    // Used to prevent duplicate category names (case-insensitive)
+    boolean existsByCategoryNameIgnoreCase(String categoryName);
 }

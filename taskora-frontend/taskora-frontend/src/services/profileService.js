@@ -1,63 +1,59 @@
 import axios from 'axios';
+import { authHeader } from './auth';
 
-const API_URL = 'http://localhost:8080/api/profile/';
-
-const authHeader = () => {
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (user && user.token) {
-    return { Authorization: 'Bearer ' + user.token };
-  } else {
-    return {};
-  }
-};
+const API_URL = 'http://localhost:8081/api/profile/';
 
 class ProfileService {
-  // Get current user's profile
   getProfile() {
     return axios.get(API_URL + 'me', { headers: authHeader() });
   }
 
-  // Update bio and portfolio link
+  // Full profile fields: fullName, headline, bio, skills, experience,
+  // education, country, state, city, website, linkedin, github
   updateProfile(data) {
     return axios.put(API_URL + 'update', data, { headers: authHeader() });
   }
 
-  // Upload Avatar (Requires multipart/form-data)
+  changePassword(currentPassword, newPassword) {
+    return axios.put(API_URL + 'change-password', { currentPassword, newPassword }, { headers: authHeader() });
+  }
+
+  deleteAccount() {
+    return axios.delete(API_URL + 'delete-account', { headers: authHeader() });
+  }
+
   uploadAvatar(file) {
     const formData = new FormData();
     formData.append('file', file);
-    return axios.post(API_URL + 'upload-avatar', formData, {
-      headers: { ...authHeader(), 'Content-Type': 'multipart/form-data' }
-    });
+    // Let axios set the multipart Content-Type WITH its boundary.
+    return axios.post(API_URL + 'upload-avatar', formData, { headers: authHeader() });
   }
 
-  // Upload Cover (Requires multipart/form-data)
   uploadCover(file) {
     const formData = new FormData();
     formData.append('file', file);
-    return axios.post(API_URL + 'upload-cover', formData, {
-      headers: { ...authHeader(), 'Content-Type': 'multipart/form-data' }
-    });
+    return axios.post(API_URL + 'upload-cover', formData, { headers: authHeader() });
   }
 
-  // --- NEW PORTFOLIO METHODS ---
-
-  // Get the user's portfolio gallery
   getPortfolio() {
     return axios.get(API_URL + 'portfolio', { headers: authHeader() });
   }
 
-  // Add a new project (Requires multipart/form-data for the image)
   addPortfolioItem(title, description, projectUrl, file) {
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
     formData.append('projectUrl', projectUrl);
     formData.append('file', file);
-    
-    return axios.post(API_URL + 'portfolio', formData, {
-      headers: { ...authHeader(), 'Content-Type': 'multipart/form-data' }
-    });
+    return axios.post(API_URL + 'portfolio', formData, { headers: authHeader() });
+  }
+
+  changeUsername(username) {
+    return axios.put(API_URL + 'change-username', { username }, { headers: authHeader() });
+  }
+
+  deletePortfolioItem(id) {
+    return axios.delete(API_URL + `portfolio/${id}`, { headers: authHeader() });
   }
 }
 

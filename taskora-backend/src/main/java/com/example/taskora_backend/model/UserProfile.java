@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "user_profiles")
 @Data
@@ -59,4 +61,7 @@ public class UserProfile {
 
     @Column(length = 255)
     private String github;
+
+    @Column(name = "subscription_fee", precision = 10, scale = 2)
+    private BigDecimal subscriptionFee;
 }

@@ -20,7 +20,6 @@ public class Portfolio {
     @Column(name = "portfolio_id")
     private Long portfolioId;
 
-    // Foreign Key to Users table
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User user;
@@ -36,6 +35,15 @@ public class Portfolio {
 
     @Column(length = 255)
     private String thumbnail;
+
+    @Column(length = 100)
+    private String category; // e.g. Web Development, Mobile App, UI/UX Design
+
+    @Column(name = "file_type", length = 50)
+    private String fileType; // IMAGE, VIDEO, DOCUMENT
+
+    @Column(name = "file_url", length = 500)
+    private String fileUrl; // URL to the uploaded file (image/video/document)
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

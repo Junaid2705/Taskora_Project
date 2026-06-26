@@ -3,17 +3,14 @@ package com.example.taskora_backend.controller;
 import com.example.taskora_backend.dto.JobRequest;
 import com.example.taskora_backend.model.Category;
 import com.example.taskora_backend.model.Job;
-import com.example.taskora_backend.model.User;
-import com.example.taskora_backend.repository.CategoryRepository;
-import com.example.taskora_backend.repository.JobRepository;
-import com.example.taskora_backend.repository.UserRepository;
-import com.example.taskora_backend.security.UserDetailsImpl;
+import com.example.taskora_backend.security.AuthUtils;
+import com.example.taskora_backend.service.CategoryService;
+import com.example.taskora_backend.service.JobService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -22,57 +19,62 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class JobController {
 
-    private final JobRepository jobRepository;
-    private final CategoryRepository categoryRepository;
-    private final UserRepository userRepository;
+    private final JobService jobService;
+    private final CategoryService categoryService;
 
-    // 1. Get all active categories (Public/All Users)
+    // 1. Active categories (Public) - kept for frontend backward compatibility
     @GetMapping("/categories")
-    public ResponseEntity<?> getCategories() {
-        List<Category> categories = categoryRepository.findByStatusTrue();
-        return ResponseEntity.ok(categories);
+    public ResponseEntity<List<Category>> getCategories() {
+        return ResponseEntity.ok(categoryService.findActive());
     }
 
-    // 2. Fetch all open jobs for the feed (Public/All Users)
+    // 2. Open-job feed (Public)
     @GetMapping("/feed")
-    public ResponseEntity<?> getJobFeed() {
-        List<Job> openJobs = jobRepository.findByStatus(Job.Status.OPEN);
-        return ResponseEntity.ok(openJobs);
+    public ResponseEntity<List<Job>> getJobFeed() {
+        return ResponseEntity.ok(jobService.getFeed());
     }
 
-    // 3. Post a new job (Protected - Must be logged in)
+    // 3. Search open jobs with optional filters (Public)
+    @GetMapping("/search")
+    public ResponseEntity<List<Job>> searchJobs(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) BigDecimal minBudget,
+            @RequestParam(required = false) BigDecimal maxBudget) {
+        return ResponseEntity.ok(jobService.search(keyword, categoryId, location, minBudget, maxBudget));
+    }
+
+    // 4. Jobs posted by the logged-in employer
+    @GetMapping("/my-jobs")
+    public ResponseEntity<List<Job>> getMyJobs() {
+        return ResponseEntity.ok(jobService.getMyJobs(AuthUtils.currentUserId()));
+    }
+
+    // 5. Job details
+    @GetMapping("/{id}")
+    public ResponseEntity<Job> getJob(@PathVariable Long id) {
+        return ResponseEntity.ok(jobService.getById(id));
+    }
+
+    // 6. Create a job (Employer)
     @PostMapping("/create")
     public ResponseEntity<?> createJob(@RequestBody JobRequest jobRequest) {
-        
-        // Find out exactly who is making this request using the JWT token
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        String userRole = userDetails.getAuthorities().iterator().next().getAuthority();
-        if (!userRole.equals("ROLE_EMPLOYER")) {
-            return ResponseEntity.status(403).body(Map.of("error", "Unauthorized: Only Employers can post jobs."));
-        }
-        User employer = userRepository.findById(userDetails.getId())
-                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+        Job job = jobService.create(jobRequest, AuthUtils.currentUserId());
+        return ResponseEntity.ok(Map.of("message", "Job posted successfully!", "jobId", job.getJobId().toString()));
+    }
 
-        // Verify the category exists
-        Category category = categoryRepository.findById(jobRequest.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Error: Category not found."));
+    // 7. Update a job (Employer, owner only)
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateJob(@PathVariable Long id, @RequestBody JobRequest jobRequest) {
+        Job job = jobService.update(id, jobRequest, AuthUtils.currentUserId());
+        return ResponseEntity.ok(Map.of("message", "Job updated successfully!", "jobId", job.getJobId().toString()));
+    }
 
-        // Build and save the new Job entity
-        Job newJob = new Job();
-        newJob.setEmployer(employer);
-        newJob.setCategory(category);
-        newJob.setTitle(jobRequest.getTitle());
-        newJob.setDescription(jobRequest.getDescription());
-        newJob.setSkillsRequired(jobRequest.getSkillsRequired());
-        newJob.setBudget(jobRequest.getBudget());
-        newJob.setExperienceRequired(jobRequest.getExperienceRequired());
-        newJob.setLocation(jobRequest.getLocation());
-        newJob.setDeadline(jobRequest.getDeadline());
-        newJob.setStatus(Job.Status.OPEN);
-
-        jobRepository.save(newJob);
-
-        return ResponseEntity.ok(Map.of("message", "Job posted successfully!", "jobId", newJob.getJobId().toString()));
+    // 8. Delete a job (Employer, owner only)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteJob(@PathVariable Long id) {
+        jobService.delete(id, AuthUtils.currentUserId());
+        return ResponseEntity.ok(Map.of("message", "Job deleted successfully!"));
     }
 }

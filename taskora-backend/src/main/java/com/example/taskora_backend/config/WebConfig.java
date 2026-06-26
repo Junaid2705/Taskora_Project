@@ -12,11 +12,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // This tells Spring Boot: If a URL asks for /uploads/**, look in the local "uploads" folder.
-        Path uploadDir = Paths.get("uploads");
-        String uploadPath = uploadDir.toFile().getAbsolutePath();
+        // Serve uploaded files from the local "uploads" folder at /uploads/**.
+        // Using Path.toUri() produces a correctly-encoded file:/// URI that works
+        // even when the absolute path contains spaces or Windows backslashes.
+        Path uploadDir = Paths.get("uploads").toAbsolutePath().normalize();
+        String location = uploadDir.toUri().toString(); // e.g. file:///D:/chrome%20downloads/.../uploads/
 
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:/" + uploadPath + "/");
+                .addResourceLocations(location);
     }
 }

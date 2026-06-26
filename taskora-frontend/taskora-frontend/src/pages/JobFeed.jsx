@@ -1,108 +1,87 @@
-import React, { useState, useEffect } from "react";
-import JobService from "../services/jobService";
-import AuthService from "../services/authService";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import JobService from '../services/jobService';
+import { getRole } from '../services/auth';
+import JobCard from '../components/JobCard';
+
+const TABS = ['All Jobs', 'Full Time', 'Part Time', 'Remote'];
 
 const JobFeed = () => {
+  const [params] = useSearchParams();
+  const isEmployer = getRole() === 'ROLE_EMPLOYER';
+  const [keyword, setKeyword] = useState(params.get('keyword') || '');
+  const [categoryId, setCategoryId] = useState('');
+  const [categories, setCategories] = useState([]);
   const [jobs, setJobs] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [tab, setTab] = useState('All Jobs');
+  const [loading, setLoading] = useState(true);
 
-  // Grab the currently logged-in user to check their role
-  const currentUser = AuthService.getCurrentUser();
+  const load = (kw = keyword, cat = categoryId) => {
+    setLoading(true);
+    const query = {};
+    if (kw) query.keyword = kw;
+    if (cat) query.categoryId = cat;
+    JobService.searchJobs(query)
+      .then((r) => setJobs(r.data))
+      .catch(() => setJobs([]))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-    JobService.getJobFeed().then(
-      (response) => {
-        setJobs(response.data);
-        setIsLoading(false);
-      },
-      (error) => {
-        setError("Failed to load the job feed.");
-        setIsLoading(false);
-      },
-    );
-  }, []);
+    JobService.getCategories().then((r) => setCategories(r.data)).catch(() => {});
+    load(params.get('keyword') || '', '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
+
+  const onSearch = (e) => { e.preventDefault(); load(); };
+
+  const filtered = jobs.filter((j) => {
+    if (tab === 'All Jobs') return true;
+    const text = `${j.title} ${j.location} ${j.experienceRequired} ${j.skillsRequired}`.toLowerCase();
+    return text.includes(tab.toLowerCase());
+  });
 
   return (
-    <div className="container py-5 fade-in">
-      <div className="row mb-4 align-items-center">
-        <div className="col-md-8">
-          <h2 className="fw-bold text-dark mb-0">Explore Open Jobs</h2>
-          <p className="text-muted">
-            Find your next freelance gig and start earning.
-          </p>
-        </div>
-
-        {/* FIX #3: ONLY EMPLOYERS CAN SEE THE POST JOB BUTTON */}
-        {currentUser && currentUser.role === "ROLE_EMPLOYER" && (
-          <div className="col-md-4 text-md-end">
-            <Link
-              to="/post-job"
-              className="btn btn-primary fw-bold px-4 rounded-pill shadow-sm"
-            >
-              <i className="bi bi-plus-lg me-2"></i>Post a Job
-            </Link>
-          </div>
-        )}
+    <div>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2 className="tk-page-title">Jobs</h2>
+        {isEmployer && <Link to="/post-job" className="btn btn-primary"><i className="bi bi-plus-lg me-1"></i>Post Job</Link>}
       </div>
 
-      {isLoading && (
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary"></div>
-        </div>
-      )}
-      {error && <div className="alert alert-danger text-center">{error}</div>}
-
-      <div className="row g-4">
-        {jobs.map((job) => (
-          <div className="col-md-6 col-lg-4" key={job.jobId}>
-            <div className="card h-100 border-0 shadow-sm d-flex flex-column hover-lift">
-              <div className="card-body p-4">
-                <div className="d-flex justify-content-between align-items-start mb-2">
-                  <span className="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">
-                    {job.category?.categoryName}
-                  </span>
-                  <span className="fw-bold text-success fs-5">
-                    ${job.budget}
-                  </span>
-                </div>
-                <h5 className="card-title fw-bold text-dark mt-3">
-                  {job.title}
-                </h5>
-                <p className="text-muted small mb-3">
-                  <i className="bi bi-person-circle me-1"></i> Posted by{" "}
-                  {job.employer?.fullName}
-                </p>
-                <p
-                  className="card-text text-muted"
-                  style={{ maxHeight: "3em", overflow: "hidden" }}
-                >
-                  {job.description}
-                </p>
-              </div>
-              <div className="card-footer bg-white border-0 pt-0 pb-4 px-4 mt-auto">
-                {/* FIX #3: ONLY FREELANCERS CAN APPLY */}
-                {currentUser && currentUser.role === "ROLE_FREELANCER" ? (
-                  <Link
-                    to={`/apply/${job.jobId}`}
-                    className="btn btn-primary w-100 fw-bold rounded-pill shadow-sm"
-                  >
-                    Apply Now
-                  </Link>
-                ) : (
-                  <button
-                    className="btn btn-light w-100 fw-bold rounded-pill text-muted"
-                    disabled
-                  >
-                    View Only
-                  </button>
-                )}
-              </div>
-            </div>
+      <form className="row g-2 mb-3" onSubmit={onSearch}>
+        <div className="col-12 col-md">
+          <div className="input-group">
+            <span className="input-group-text bg-white"><i className="bi bi-search text-muted"></i></span>
+            <input className="form-control" placeholder="Search jobs..." value={keyword}
+              onChange={(e) => setKeyword(e.target.value)} />
           </div>
+        </div>
+        <div className="col-8 col-md-3">
+          <select className="form-select" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+            <option value="">All Categories</option>
+            {categories.map((c) => <option key={c.categoryId} value={c.categoryId}>{c.categoryName}</option>)}
+          </select>
+        </div>
+        <div className="col-4 col-md-auto">
+          <button className="btn btn-primary w-100"><i className="bi bi-funnel me-1"></i>Filter</button>
+        </div>
+      </form>
+
+      <div className="tk-tabs mb-3">
+        {TABS.map((t) => (
+          <button key={t} className={`tk-tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>{t}</button>
         ))}
       </div>
+
+      {loading ? (
+        <div className="text-center py-5"><div className="spinner-border text-primary" /></div>
+      ) : filtered.length === 0 ? (
+        <div className="tk-card tk-empty"><i className="bi bi-search d-block mb-2"></i>No jobs found.</div>
+      ) : (
+        <div className="d-flex flex-column gap-3">
+          {filtered.map((j) => <JobCard key={j.jobId} job={j} />)}
+        </div>
+      )}
     </div>
   );
 };

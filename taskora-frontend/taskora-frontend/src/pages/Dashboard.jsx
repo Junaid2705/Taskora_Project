@@ -1,99 +1,73 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import AuthService from "../services/authService";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import JobService from '../services/jobService';
+import BidService from '../services/bidService';
+import MessageService from '../services/messageService';
+import { getCurrentUser, getRole } from '../services/auth';
+import JobCard from '../components/JobCard';
+
+const StatCard = ({ icon, bg, color, value, label }) => (
+  <div className="col-12 col-md-4">
+    <div className="tk-card tk-card-pad d-flex align-items-center gap-3 h-100">
+      <div className="tk-stat-icon" style={{ background: bg, color }}>
+        <i className={`bi ${icon}`}></i>
+      </div>
+      <div>
+        <div className="fs-3 fw-bold lh-1">{value}</div>
+        <div className="text-muted small">{label}</div>
+      </div>
+    </div>
+  </div>
+);
 
 const Dashboard = () => {
-  const currentUser = AuthService.getCurrentUser();
+  const user = getCurrentUser() || {};
+  const isEmployer = getRole() === 'ROLE_EMPLOYER';
+  const [jobs, setJobs] = useState([]);
+  const [stats, setStats] = useState({ a: 0, b: 0, m: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const tasks = [
+      JobService.getJobFeed().then((r) => setJobs(r.data.slice(0, 5))).catch(() => {}),
+    ];
+    const a = isEmployer ? JobService.getMyJobs() : JobService.getMyApplications();
+    Promise.all([
+      a.then((r) => r.data.length).catch(() => 0),
+      BidService.getMyBids().then((r) => r.data.length).catch(() => 0),
+      MessageService.getContacts().then((r) => r.data.length).catch(() => 0),
+    ]).then(([x, y, z]) => setStats({ a: x, b: y, m: z }));
+    Promise.all(tasks).finally(() => setLoading(false));
+  }, [isEmployer]);
 
   return (
-    <div className="fade-in">
-      {/* Header Section */}
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-2 border-bottom">
-        <div className="mb-3 mb-md-0">
-          <h2 className="fw-bold mb-1 text-dark">Dashboard Overview</h2>
-          <p className="text-muted mb-0">
-            Welcome back,{" "}
-            <span className="text-primary fw-bold">
-              {currentUser?.fullName || currentUser?.username}
-            </span>
-            ! Here is what's happening today.
-          </p>
-        </div>
-
-        {/* Action Button */}
-        {currentUser?.role === "ROLE_EMPLOYER" ? (
-          <Link
-            to="/post-job"
-            className="btn btn-primary d-flex align-items-center gap-2 shadow-sm"
-          >
-            <i className="bi bi-plus-lg"></i> Post a Job
-          </Link>
-        ) : (
-          <Link
-            to="/jobs"
-            className="btn btn-primary d-flex align-items-center gap-2 shadow-sm"
-          >
-            <i className="bi bi-search"></i> Find Jobs
-          </Link>
-        )}
+    <div>
+      <div className="mb-4">
+        <h2 className="tk-page-title">Hello, {user.username} 👋</h2>
+        <p className="text-muted mb-0">Welcome back to Taskora</p>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="row g-4 mb-5">
-        <div className="col-md-4">
-          <div className="card h-100 border-0 p-3 shadow-sm">
-            <div className="card-body d-flex align-items-center">
-              <div className="bg-primary bg-opacity-10 text-primary p-3 rounded-circle me-3">
-                <i className="bi bi-send-fill fs-4"></i>
-              </div>
-              <div>
-                <h6 className="text-muted mb-1 fw-semibold">Active Bids</h6>
-                <h3 className="fw-bold mb-0 text-dark">12</h3>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-4">
-          <div className="card h-100 border-0 p-3 shadow-sm">
-            <div className="card-body d-flex align-items-center">
-              <div className="bg-success bg-opacity-10 text-success p-3 rounded-circle me-3">
-                <i className="bi bi-check-circle-fill fs-4"></i>
-              </div>
-              <div>
-                <h6 className="text-muted mb-1 fw-semibold">
-                  Completed Projects
-                </h6>
-                <h3 className="fw-bold mb-0 text-dark">8</h3>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-4">
-          <div className="card h-100 border-0 p-3 shadow-sm">
-            <div className="card-body d-flex align-items-center">
-              <div className="bg-warning bg-opacity-10 text-warning p-3 rounded-circle me-3">
-                <i className="bi bi-envelope-fill fs-4"></i>
-              </div>
-              <div>
-                <h6 className="text-muted mb-1 fw-semibold">Unread Messages</h6>
-                <h3 className="fw-bold mb-0 text-dark">4</h3>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="row g-3 mb-4">
+        <StatCard icon={isEmployer ? 'bi-briefcase-fill' : 'bi-send-fill'} bg="#e8f0fe" color="#2563eb"
+          value={stats.a} label={isEmployer ? 'Jobs Posted' : 'Jobs Applied'} />
+        <StatCard icon="bi-hammer" bg="#fff1e6" color="#ea580c" value={stats.b} label="Projects Bidding" />
+        <StatCard icon="bi-chat-dots-fill" bg="#e7f7ee" color="#16a34a" value={stats.m} label="Messages" />
       </div>
 
-      {/* Recent Activity Feed Placeholder */}
-      <h5 className="fw-bold mb-3 text-dark">Recent Activity</h5>
-      <div className="card border-0 shadow-sm">
-        <div className="card-body text-center p-5 text-muted bg-white rounded">
-          <i className="bi bi-activity fs-1 text-light mb-3 d-block"></i>
-          Your live job and project feed will load here once connected to the
-          backend.
-        </div>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="fw-bold mb-0">Recommended for You</h5>
+        <Link to="/jobs" className="fw-semibold small">View All</Link>
       </div>
+
+      {loading ? (
+        <div className="text-center py-5"><div className="spinner-border text-primary" /></div>
+      ) : jobs.length === 0 ? (
+        <div className="tk-card tk-empty"><i className="bi bi-inbox d-block mb-2"></i>No open jobs yet.</div>
+      ) : (
+        <div className="d-flex flex-column gap-3">
+          {jobs.map((j) => <JobCard key={j.jobId} job={j} />)}
+        </div>
+      )}
     </div>
   );
 };

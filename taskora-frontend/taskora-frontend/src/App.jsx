@@ -1,82 +1,133 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
-// Import Components
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import Sidebar from "./components/Sidebar"; // <-- Added Sidebar import
+import AppLayout from "./components/AppLayout";
+import AdminLayout from "./components/AdminLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-// Import Pages
+// Public pages
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
 import VerifyEmail from "./pages/VerifyEmail";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import PostJob from "./pages/PostJob";
-import JobFeed from "./pages/JobFeed";
-import ApplyJob from "./pages/ApplyJob";
-import ViewApplications from "./pages/ViewApplications";
-import MyApplications from "./pages/MyApplications";
-import Profile from './pages/Profile';
-import Messages from './pages/Messages';
 
-// --- NEW: Master Layout for Authenticated Pages ---
-// This permanently pins the Sidebar to the left and injects the page content on the right
-const SidebarLayout = () => {
-  return (
-    <div className="container-fluid bg-light min-vh-100">
-      <div className="row min-vh-100">
-        {/* Sidebar Column */}
-        <div className="col-md-3 col-lg-2 p-0 d-none d-md-block border-end bg-white">
-          <Sidebar />
-        </div>
-        
-        {/* Main Content Column */}
-        <div className="col-md-9 col-lg-10 p-4 p-lg-5">
-          <Outlet /> {/* This dynamically loads the Dashboard, Jobs, or Profile here! */}
-        </div>
-      </div>
-    </div>
-  );
+// App pages
+import Dashboard from "./pages/Dashboard";
+import JobFeed from "./pages/JobFeed";
+import JobDetails from "./pages/JobDetails";
+import PostJob from "./pages/PostJob";
+import ApplyJob from "./pages/ApplyJob";
+import MyApplications from "./pages/MyApplications";
+import MyJobs from "./pages/MyJobs";
+import ViewApplications from "./pages/ViewApplications";
+import Projects from "./pages/Projects";
+import ProjectDetails from "./pages/ProjectDetails";
+import PostProject from "./pages/PostProject";
+import MyBids from "./pages/MyBids";
+import Profile from "./pages/Profile";
+import Messages from "./pages/Messages";
+import Feed from "./pages/Feed";
+import Notifications from "./pages/Notifications";
+import Search from "./pages/Search";
+import Subscriptions from "./pages/Subscriptions";
+import PortfolioPage from "./pages/PortfolioPage";
+
+// Admin pages
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminJobs from "./pages/admin/AdminJobs";
+import AdminProjects from "./pages/admin/AdminProjects";
+import AdminCategories from "./pages/admin/AdminCategories";
+import AdminPlaceholder from "./pages/admin/AdminPlaceholder";
+import AdminSettings from "./pages/admin/AdminSettings";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
+import AdminApplications from "./pages/admin/AdminApplications";
+import AdminCms from "./pages/admin/AdminCms";
+import AdminPosts from "./pages/admin/AdminPosts";
+
+// Extra pages
+import ReportUser from "./pages/ReportUser";
+import CmsPage from "./pages/CmsPage";
+
+import { hasRole } from "./services/auth";
+
+// Admin guard — wraps admin routes
+const AdminRoute = ({ children }) => {
+  if (!hasRole('ADMIN')) return <Navigate to="/dashboard" replace />;
+  return children;
 };
 
 function App() {
   return (
     <Router>
-      <div className="d-flex flex-column min-vh-100 fade-in">
-        {/* Navbar stays at the top of every page */}
-        <Navbar />
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/page/:slug" element={<CmsPage />} />
 
-        <main className="flex-grow-1">
-          <Routes>
-            {/* --- PUBLIC ROUTES (No Sidebar) --- */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            
+        {/* Authenticated app (sidebar + topbar + mobile nav) */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/feed" element={<Feed />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/subscriptions" element={<Subscriptions />} />
+          <Route path="/portfolio" element={<PortfolioPage />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/jobs" element={<JobFeed />} />
+          <Route path="/jobs/:id" element={<JobDetails />} />
+          <Route path="/post-job" element={<PostJob />} />
+          <Route path="/apply/:jobId" element={<ApplyJob />} />
+          <Route path="/my-applications" element={<MyApplications />} />
+          <Route path="/my-jobs" element={<MyJobs />} />
+          <Route path="/applications/job/:jobId" element={<ViewApplications />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/projects/:id" element={<ProjectDetails />} />
+          <Route path="/post-project" element={<PostProject />} />
+          <Route path="/my-bids" element={<MyBids />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/report" element={<ReportUser />} />
+        </Route>
 
-            {/* --- AUTHENTICATED ROUTES (With Sidebar) --- */}
-            <Route element={<SidebarLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/post-job" element={<PostJob />} />
-              <Route path="/jobs" element={<JobFeed />} />
-              <Route path="/apply/:jobId" element={<ApplyJob />} />
-              <Route path="/applications/job/:jobId" element={<ViewApplications />} />
-              <Route path="/my-applications" element={<MyApplications />} />
-              <Route path="/messages" element={<Messages />} />
-            </Route>
-          </Routes>
-        </main>
+        {/* Admin panel */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <AdminLayout />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/jobs" element={<AdminJobs />} />
+          <Route path="/admin/projects" element={<AdminProjects />} />
+          <Route path="/admin/posts" element={<AdminPosts />} />
+          <Route path="/admin/categories" element={<AdminCategories />} />
+          <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
+          <Route path="/admin/applications" element={<AdminApplications />} />
+          <Route path="/admin/reports" element={<AdminReports />} />
+          <Route path="/admin/cms" element={<AdminCms />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
+        </Route>
 
-        {/* Footer stays at the bottom of every page */}
-        <Footer />
-      </div>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </Router>
   );
 }

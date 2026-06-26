@@ -1,221 +1,128 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import AuthService from "../services/authService";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import AuthService from '../services/authService';
+import Brand from '../components/Brand';
 
 const Register = () => {
   const navigate = useNavigate();
-
-  // State management for form tracking
-  const [formData, setFormData] = useState({
-    fullName: "",
-    username: "",
-    mobile: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    role: "FREELANCER",
+  const [form, setForm] = useState({
+    fullName: '', username: '', email: '', mobile: '', password: '', confirm: '', role: 'FREELANCER',
   });
+  const [agree, setAgree] = useState(false);
+  const [showPwd, setShowPwd] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const [message, setMessage] = useState("");
-  const [isError, setIsError] = useState(false);
+  const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // Generic handler to capture text input dynamically
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleRegister = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
-    setIsError(false);
-
-    // Frontend validation guard clause
-    if (formData.password !== formData.confirmPassword) {
-      setMessage("Passwords do not match!");
-      setIsError(true);
-      return;
+    setError(''); setSuccess('');
+    if (form.password !== form.confirm) return setError('Passwords do not match.');
+    if (!agree) return setError('Please accept the Terms & Conditions to continue.');
+    setLoading(true);
+    try {
+      await AuthService.register(form);
+      setSuccess('Account created! Please check your email to verify, then login.');
+      setTimeout(() => navigate('/login'), 1800);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    AuthService.register(
-      formData.fullName,
-      formData.username,
-      formData.mobile,
-      formData.email,
-      formData.password,
-      formData.role,
-    ).then(
-      (response) => {
-        setMessage(response.data.message || "Registration successful!");
-        setTimeout(() => navigate("/login"), 2000); // Redirect to login page after success
-      },
-      (error) => {
-        const resMessage =
-          (error.response &&
-            error.response.data &&
-            error.response.data.error) ||
-          error.message ||
-          error.toString();
-        setMessage(resMessage);
-        setIsError(true);
-      },
-    );
   };
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-md-8 col-lg-6 col-xl-5">
-          <div className="card border-0 mt-4 p-2">
-            <div className="card-body p-4 p-md-5">
-              <div className="text-center mb-4">
-                <h3 className="fw-bold text-dark">Create an Account</h3>
-                <p className="text-muted">
-                  Join Taskora and build your professional network
-                </p>
+    <div className="tk-auth">
+      <div className="tk-auth-form">
+        <div className="tk-auth-form-inner fade-in">
+          <div className="mb-3"><Brand /></div>
+          <h3 className="fw-bold mb-1">Create Account</h3>
+          <p className="text-muted mb-3">Join Taskora today</p>
+
+          {error && <div className="alert alert-danger py-2 small">{error}</div>}
+          {success && <div className="alert alert-success py-2 small">{success}</div>}
+
+          <form onSubmit={onSubmit}>
+            <div className="mb-2">
+              <label className="form-label">Full Name</label>
+              <input name="fullName" className="form-control" placeholder="Enter full name"
+                value={form.fullName} onChange={onChange} required />
+            </div>
+            <div className="row g-2">
+              <div className="col-sm-6 mb-2">
+                <label className="form-label">Username</label>
+                <input name="username" className="form-control" placeholder="Choose a username"
+                  value={form.username} onChange={onChange} required />
               </div>
-
-              {/* Status Alert Banner */}
-              {message && (
-                <div
-                  className={`alert ${isError ? "alert-danger" : "alert-success"} text-center fw-medium border-0 shadow-sm`}
-                  role="alert"
-                >
-                  {message}
-                </div>
-              )}
-
-              <form onSubmit={handleRegister}>
-                <div className="row">
-                  <div className="col-12 mb-3">
-                    <label className="form-label fw-semibold text-dark">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      className="form-control"
-                      placeholder="John Doe"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="col-12 mb-3">
-                    <label className="form-label fw-semibold text-dark">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      name="username"
-                      className="form-control"
-                      placeholder="johndoe123"
-                      value={formData.username}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="col-12 mb-3">
-                    <label className="form-label fw-semibold text-dark">
-                      Mobile Number
-                    </label>
-                    <input
-                      type="tel"
-                      name="mobile"
-                      className="form-control"
-                      placeholder="+1 234 567 8900"
-                      value={formData.mobile}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="col-12 mb-3">
-                    <label className="form-label fw-semibold text-dark">
-                      Email address
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      className="form-control"
-                      placeholder="name@example.com"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="col-12 mb-3">
-                    <label className="form-label fw-semibold text-dark">
-                      I want to join as a:
-                    </label>
-                    <select
-                      name="role"
-                      className="form-select"
-                      value={formData.role}
-                      onChange={handleChange}
-                    >
-                      <option value="FREELANCER">
-                        Freelancer (Looking for work)
-                      </option>
-                      <option value="EMPLOYER">Employer (Hiring talent)</option>
-                      <option value="CREATOR">
-                        Creator (Building an audience)
-                      </option>
-                    </select>
-                  </div>
-
-                  <div className="col-12 mb-3">
-                    <label className="form-label fw-semibold text-dark">
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      name="password"
-                      className="form-control"
-                      placeholder="Create password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="col-12 mb-4">
-                    <label className="form-label fw-semibold text-dark">
-                      Confirm Password
-                    </label>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      className="form-control"
-                      placeholder="Confirm password"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary w-100 fw-bold py-2 mb-3"
-                >
-                  Create Account
-                </button>
-              </form>
-
-              <div className="text-center mt-3">
-                <p className="mb-0 text-muted fw-medium">
-                  Already have an account?{" "}
-                  <Link to="/login" className="text-decoration-none fw-bold">
-                    Login here
-                  </Link>
-                </p>
+              <div className="col-sm-6 mb-2">
+                <label className="form-label">Mobile</label>
+                <input name="mobile" className="form-control" placeholder="Mobile number"
+                  value={form.mobile} onChange={onChange} required />
               </div>
             </div>
-          </div>
+            <div className="mb-2">
+              <label className="form-label">Email</label>
+              <input type="email" name="email" className="form-control" placeholder="Enter email"
+                value={form.email} onChange={onChange} required />
+            </div>
+            <div className="row g-2">
+              <div className="col-sm-6 mb-2">
+                <label className="form-label">Password</label>
+                <div className="input-group">
+                  <input type={showPwd ? 'text' : 'password'} name="password" className="form-control"
+                    placeholder="Password" value={form.password} onChange={onChange} required minLength={6} />
+                  <span className="input-group-text tk-input-eye" onClick={() => setShowPwd(!showPwd)}>
+                    <i className={`bi ${showPwd ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                  </span>
+                </div>
+              </div>
+              <div className="col-sm-6 mb-2">
+                <label className="form-label">Confirm Password</label>
+                <div className="input-group">
+                  <input type={showConfirm ? 'text' : 'password'} name="confirm" className="form-control"
+                    placeholder="Confirm" value={form.confirm} onChange={onChange} required />
+                  <span className="input-group-text tk-input-eye" onClick={() => setShowConfirm(!showConfirm)}>
+                    <i className={`bi ${showConfirm ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">I am a</label>
+              <select name="role" className="form-select" value={form.role} onChange={onChange}>
+                <option value="FREELANCER">Freelancer</option>
+                <option value="EMPLOYER">Employer</option>
+                <option value="CREATOR">Creator</option>
+              </select>
+            </div>
+            <div className="form-check mb-3">
+              <input className="form-check-input" type="checkbox" id="agree" checked={agree}
+                onChange={(e) => setAgree(e.target.checked)} />
+              <label className="form-check-label small text-muted" htmlFor="agree">
+                I agree to the <span className="text-primary">Terms & Conditions</span> and Privacy Policy
+              </label>
+            </div>
+            <button className="btn btn-primary w-100 mb-3" disabled={loading}>
+              {loading ? 'Creating...' : 'Register'}
+            </button>
+          </form>
+
+          <p className="text-center text-muted mb-0">
+            Already have an account? <Link to="/login" className="fw-bold">Login</Link>
+          </p>
         </div>
+      </div>
+      <div className="tk-auth-aside">
+        <svg width="360" height="360" viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="180" cy="180" r="150" fill="#dbe6ff" />
+          <rect x="120" y="110" width="120" height="150" rx="12" fill="#2563eb" />
+          <circle cx="180" cy="150" r="28" fill="#fb923c" />
+          <rect x="140" y="200" width="80" height="12" rx="6" fill="#fff" opacity="0.85" />
+          <rect x="140" y="222" width="60" height="12" rx="6" fill="#fff" opacity="0.6" />
+        </svg>
       </div>
     </div>
   );
