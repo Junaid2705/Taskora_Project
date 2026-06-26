@@ -43,7 +43,7 @@ const AppLayout = () => {
         {sideLink('/projects', 'bi-folder-fill', 'Projects')}
         {sideLink('/messages', 'bi-chat-dots-fill', 'Messages')}
         {sideLink('/subscriptions', 'bi-star-fill', 'Subscriptions')}
-        {sideLink('/portfolio', 'bi-images', 'Portfolio')}
+        {sideLink('/my-portfolio', 'bi-images', 'Portfolio')}
         {isEmployer
           ? sideLink('/my-jobs', 'bi-file-earmark-text-fill', 'My Jobs')
           : sideLink('/my-applications', 'bi-file-earmark-text-fill', 'Applications')}

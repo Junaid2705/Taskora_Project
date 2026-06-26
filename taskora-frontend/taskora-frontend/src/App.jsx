@@ -85,7 +85,7 @@ function App() {
           <Route path="/feed" element={<Feed />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/subscriptions" element={<Subscriptions />} />
-          <Route path="/portfolio" element={<PortfolioPage />} />
+          <Route path="/my-portfolio" element={<PortfolioPage />} />
           <Route path="/search" element={<Search />} />
           <Route path="/jobs" element={<JobFeed />} />
           <Route path="/jobs/:id" element={<JobDetails />} />
