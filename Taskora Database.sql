@@ -209,4 +209,27 @@ show tables;
 
 select *from users;
 
+DROP DATABASE taskora_db;
+CREATE DATABASE taskora_db;
+use taskora_db;
+show tables;
+select *from users;
+SHOW CREATE TABLE users;
+INSERT INTO categories (category_name, description, status) VALUES 
+('Web Development', 'Frontend, Backend, and Full Stack development', true),
+('Graphic Design', 'Logos, UI/UX, and illustration', true),
+('Digital Marketing', 'SEO, Social Media, and Ads', true);
 
+INSERT INTO users (full_name, username, email, mobile, password, role, email_verified, status) VALUES
+('Alice Employer', 'employer', 'employer@taskora.com', '9000000001', '$2a$10$LZduT6cSeGlX0yr0JUiM8ORPqSJZ76nEFbC4szCPG..5F3jbYeJIW', 'EMPLOYER', 1, 'ACTIVE'),
+('Frank Freelancer', 'freelancer', 'freelancer@taskora.com', '9000000002', '$2a$10$LZduT6cSeGlX0yr0JUiM8ORPqSJZ76nEFbC4szCPG..5F3jbYeJIW', 'FREELANCER', 1, 'ACTIVE'),
+('Grace Freelancer', 'freelancer2', 'freelancer2@taskora.com', '9000000003', '$2a$10$LZduT6cSeGlX0yr0JUiM8ORPqSJZ76nEFbC4szCPG..5F3jbYeJIW', 'FREELANCER', 1, 'ACTIVE'),
+('Cara Creator', 'creator', 'creator@taskora.com', '9000000004', '$2a$10$LZduT6cSeGlX0yr0JUiM8ORPqSJZ76nEFbC4szCPG..5F3jbYeJIW', 'CREATOR', 1, 'ACTIVE'),
+('Adam Admin', 'admin', 'admin@taskora.com', '9000000005', '$2a$10$LZduT6cSeGlX0yr0JUiM8ORPqSJZ76nEFbC4szCPG..5F3jbYeJIW', 'ADMIN', 1, 'ACTIVE');
+ 
+INSERT INTO categories (category_name, description, status) VALUES
+('Web Development', 'Websites and web applications', 1),
+('Mobile Development', 'iOS and Android apps', 1),
+('AI & ML', 'Artificial Intelligence and Machine Learning', 1),
+('Cloud Computing', 'AWS, Azure, GCP services', 1),
+('UI/UX Design', 'Interface and experience design', 1);
