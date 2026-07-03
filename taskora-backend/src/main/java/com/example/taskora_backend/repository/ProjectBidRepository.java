@@ -4,6 +4,7 @@ import com.example.taskora_backend.model.Project;
 import com.example.taskora_backend.model.ProjectBid;
 import com.example.taskora_backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,4 +17,7 @@ public interface ProjectBidRepository extends JpaRepository<ProjectBid, Long> {
     List<ProjectBid> findByFreelancer(User freelancer);
 
     boolean existsByProjectAndFreelancer(Project project, User freelancer);
+
+    @Modifying
+    void deleteByFreelancer(User freelancer);
 }

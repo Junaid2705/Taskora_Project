@@ -4,6 +4,7 @@ import com.example.taskora_backend.model.Job;
 import com.example.taskora_backend.model.JobApplication;
 import com.example.taskora_backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,4 +20,7 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     
     // Check if a freelancer already applied to this job
     Boolean existsByJobAndFreelancer(Job job, User freelancer);
+
+    @Modifying
+    void deleteByFreelancer(User freelancer);
 }

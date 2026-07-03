@@ -1,6 +1,7 @@
 package com.example.taskora_backend.repository;
 
 import com.example.taskora_backend.model.Notification;
+import com.example.taskora_backend.model.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,4 +23,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Transactional
     @Query("UPDATE Notification n SET n.isRead = true WHERE n.user.userId = :userId AND n.isRead = false")
     int markAllRead(@Param("userId") Long userId);
+
+    @Modifying
+    void deleteByUser(User user);
 }

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -50,6 +51,9 @@ public class ProjectController {
 
     @PostMapping
     public ResponseEntity<?> createProject(@Valid @RequestBody ProjectRequest request) {
+        if ("ROLE_CREATOR".equals(AuthUtils.currentRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Creators cannot post projects.");
+        }
         Project project = projectService.create(request, AuthUtils.currentUserId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("message", "Project created successfully!", "projectId", project.getProjectId().toString()));

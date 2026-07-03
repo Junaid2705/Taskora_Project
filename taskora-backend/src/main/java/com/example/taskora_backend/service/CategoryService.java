@@ -3,9 +3,12 @@ package com.example.taskora_backend.service;
 import com.example.taskora_backend.dto.CategoryRequest;
 import com.example.taskora_backend.model.Category;
 import com.example.taskora_backend.repository.CategoryRepository;
+import com.example.taskora_backend.repository.JobRepository;
+import com.example.taskora_backend.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -15,6 +18,8 @@ import java.util.List;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final JobRepository jobRepository;
+    private final ProjectRepository projectRepository;
 
     /** All categories (admin view). */
     public List<Category> findAll() {
@@ -60,8 +65,16 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
+    @Transactional
     public void delete(Long id) {
         Category category = findById(id);
+        // Nullify FK references so delete doesn't violate constraints
+        jobRepository.findAll().stream()
+            .filter(j -> j.getCategory() != null && j.getCategory().getCategoryId().equals(id))
+            .forEach(j -> { j.setCategory(null); jobRepository.save(j); });
+        projectRepository.findAll().stream()
+            .filter(p -> p.getCategory() != null && p.getCategory().getCategoryId().equals(id))
+            .forEach(p -> { p.setCategory(null); projectRepository.save(p); });
         categoryRepository.delete(category);
     }
 }

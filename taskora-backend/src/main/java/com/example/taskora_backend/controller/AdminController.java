@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -28,6 +29,15 @@ public class AdminController {
     private final CategoryRepository categoryRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final PostRepository postRepository;
+    private final PostLikeRepository postLikeRepository;
+    private final PostCommentRepository postCommentRepository;
+    private final MessageRepository messageRepository;
+    private final NotificationRepository notificationRepository;
+    private final ProjectBidRepository bidRepository;
+    private final PortfolioRepository portfolioRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final UserVerificationRepository verificationRepository;
+    private final ReportRepository reportRepository;
 
     // =============== Dashboard Stats ===============
     @GetMapping("/stats")
@@ -85,10 +95,44 @@ public class AdminController {
     }
 
     @DeleteMapping("/users/{id}")
+    @Transactional
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         requireAdmin();
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
+
+        // Delete all related data (order matters for FK constraints)
+        // 1. Post likes and comments (reference posts AND user)
+        postLikeRepository.deleteByUser(user);
+        postCommentRepository.deleteByUser(user);
+        // 2. Posts by user
+        postRepository.deleteByUser(user);
+        // 3. Job applications
+        applicationRepository.deleteByFreelancer(user);
+        // 4. Jobs posted by employer
+        jobRepository.deleteByEmployer(user);
+        // 5. Project bids
+        bidRepository.deleteByFreelancer(user);
+        // 6. Projects
+        projectRepository.deleteByUser(user);
+        // 7. Messages (sender or receiver)
+        messageRepository.deleteBySender(user);
+        messageRepository.deleteByReceiver(user);
+        // 8. Notifications
+        notificationRepository.deleteByUser(user);
+        // 9. Subscriptions (both as creator and subscriber)
+        subscriptionRepository.deleteByCreator(user);
+        subscriptionRepository.deleteBySubscriber(user);
+        // 10. Reports (both as reporter and target)
+        reportRepository.deleteByReportedBy(user);
+        reportRepository.deleteByTarget(user);
+        // 11. Portfolio
+        portfolioRepository.deleteByUser(user);
+        // 12. UserProfile
+        userProfileRepository.deleteByUser(user);
+        // 13. UserVerification
+        verificationRepository.deleteByUser(user);
+        // Finally delete the user itself
         userRepository.delete(user);
         return ResponseEntity.ok(Map.of("message", "User deleted."));
     }

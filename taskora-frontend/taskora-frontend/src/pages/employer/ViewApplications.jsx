@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import JobService from '../services/jobService';
-import Avatar from '../components/Avatar';
-import { timeAgo, statusPill, money } from '../lib/format';
+import JobService from '../../services/jobService';
+import Avatar from '../../components/Avatar';
+import { timeAgo, statusPill, money } from '../../lib/format';
 
 const STATUSES = ['PENDING', 'SHORTLISTED', 'HIRED', 'REJECTED'];
 

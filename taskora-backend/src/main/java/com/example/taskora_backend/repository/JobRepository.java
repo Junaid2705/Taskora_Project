@@ -3,6 +3,7 @@ package com.example.taskora_backend.repository;
 import com.example.taskora_backend.model.Job;
 import com.example.taskora_backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -21,6 +22,9 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     
     // Fetch jobs by a specific category
     List<Job> findByCategory_CategoryIdAndStatus(Long categoryId, Job.Status status);
+
+    @Modifying
+    void deleteByEmployer(User employer);
 
     /**
      * Flexible search over OPEN jobs. Every filter is optional: when a

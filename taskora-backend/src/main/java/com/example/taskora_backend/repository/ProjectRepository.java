@@ -3,6 +3,7 @@ package com.example.taskora_backend.repository;
 import com.example.taskora_backend.model.Project;
 import com.example.taskora_backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,6 +17,9 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findByProjectStatus(Project.ProjectStatus status);
 
     List<Project> findByUser(User user);
+
+    @Modifying
+    void deleteByUser(User user);
 
     /**
      * Flexible search over OPEN projects. Every filter is optional.

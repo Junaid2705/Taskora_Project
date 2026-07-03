@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import BidService from '../services/bidService';
-import { money, timeAgo, statusPill } from '../lib/format';
+import BidService from '../../services/bidService';
+import { money, timeAgo, statusPill } from '../../lib/format';
 
 const MyBids = () => {
   const [bids, setBids] = useState([]);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import JobService from '../services/jobService';
+import JobService from '../../services/jobService';
 
 const PostJob = () => {
   const navigate = useNavigate();

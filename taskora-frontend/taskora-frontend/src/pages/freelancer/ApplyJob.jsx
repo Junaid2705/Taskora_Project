@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import JobService from '../services/jobService';
-import { budgetRange } from '../lib/format';
+import JobService from '../../services/jobService';
+import { budgetRange } from '../../lib/format';
 
 const ApplyJob = () => {
   const { jobId } = useParams();

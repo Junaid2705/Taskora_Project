@@ -7,8 +7,10 @@ import com.example.taskora_backend.security.AuthUtils;
 import com.example.taskora_backend.service.CategoryService;
 import com.example.taskora_backend.service.JobService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -60,6 +62,9 @@ public class JobController {
     // 6. Create a job (Employer)
     @PostMapping("/create")
     public ResponseEntity<?> createJob(@RequestBody JobRequest jobRequest) {
+        if ("ROLE_CREATOR".equals(AuthUtils.currentRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Creators cannot post jobs.");
+        }
         Job job = jobService.create(jobRequest, AuthUtils.currentUserId());
         return ResponseEntity.ok(Map.of("message", "Job posted successfully!", "jobId", job.getJobId().toString()));
     }

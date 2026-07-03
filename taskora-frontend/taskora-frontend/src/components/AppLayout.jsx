@@ -11,6 +11,8 @@ const AppLayout = () => {
   const user = getCurrentUser() || {};
   const role = getRole();
   const isEmployer = role === "ROLE_EMPLOYER";
+  const isCreator = role === "ROLE_CREATOR";
+  const isFreelancer = role === "ROLE_FREELANCER";
 
   const handleLogout = () => {
     logout();
@@ -37,31 +39,36 @@ const AppLayout = () => {
     </NavLink>
   );
 
+  // Role-based accent colors and labels
+  const sidebarConfig = isCreator
+    ? { accent: "#9333ea", label: "Creator Studio", dot: "🟣" }
+    : isEmployer
+    ? { accent: "#ea580c", label: "Employer Hub", dot: "🟠" }
+    : { accent: "#2563eb", label: "Freelancer Hub", dot: "🔵" };
+
   return (
     <div className="tk-app">
       {/* ---------- Sidebar ---------- */}
-      {/* FIX APPLIED HERE: Added overflow-y-auto and maxHeight: 100vh so the sidebar scrolls internally */}
       <aside
         className={`tk-sidebar overflow-y-auto ${open ? "open" : ""}`}
         style={{ maxHeight: "100vh", paddingBottom: "20px" }}
       >
         <Brand />
-        <div className="tk-sidebar-section">Main Menu</div>
+        <div className="tk-sidebar-section" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <span>{sidebarConfig.dot}</span> {sidebarConfig.label}
+        </div>
         {sideLink("/dashboard", "bi-grid-1x2-fill", "Dashboard")}
         {sideLink("/feed", "bi-newspaper", "Feed")}
-        {sideLink("/jobs", "bi-briefcase-fill", "Jobs")}
-        {sideLink("/projects", "bi-folder-fill", "Projects")}
+        {!isCreator && sideLink("/jobs", "bi-briefcase-fill", "Jobs")}
+        {!isCreator && sideLink("/projects", "bi-folder-fill", "Projects")}
         {sideLink("/messages", "bi-chat-dots-fill", "Messages")}
-        {sideLink("/subscriptions", "bi-star-fill", "Subscriptions")}
-        {sideLink("/my-portfolio", "bi-images", "Portfolio")}
-        {isEmployer
-          ? sideLink("/my-jobs", "bi-file-earmark-text-fill", "My Jobs")
-          : sideLink(
-              "/my-applications",
-              "bi-file-earmark-text-fill",
-              "Applications",
-            )}
-        {!isEmployer && sideLink("/my-bids", "bi-hammer", "My Bids")}
+        {!isEmployer && sideLink("/subscriptions", "bi-star-fill", "Subscriptions")}
+        {isFreelancer && sideLink("/my-portfolio", "bi-images", "Portfolio")}
+        {isEmployer && sideLink("/my-jobs", "bi-file-earmark-text-fill", "My Jobs")}
+        {isEmployer && sideLink("/post-job", "bi-plus-circle-fill", "Post Job")}
+        {isEmployer && sideLink("/post-project", "bi-plus-square-fill", "Post Project")}
+        {isFreelancer && sideLink("/my-applications", "bi-file-earmark-text-fill", "Applications")}
+        {isFreelancer && sideLink("/my-bids", "bi-hammer", "My Bids")}
 
         <div className="tk-sidebar-section">Account</div>
         {sideLink("/profile", "bi-person-circle", "Profile")}

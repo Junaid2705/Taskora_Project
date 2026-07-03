@@ -1,6 +1,7 @@
 package com.example.taskora_backend.repository;
 
 import com.example.taskora_backend.model.Message;
+import com.example.taskora_backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -34,4 +35,12 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     // Unread count from a specific sender (for per-contact badges)
     long countByReceiver_UserIdAndSender_UserIdAndIsReadFalse(Long me, Long other);
+
+    @Modifying
+    @Transactional
+    void deleteBySender(User sender);
+
+    @Modifying
+    @Transactional
+    void deleteByReceiver(User receiver);
 }

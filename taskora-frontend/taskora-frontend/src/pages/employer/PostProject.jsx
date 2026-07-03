@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ProjectService from '../services/projectService';
-import JobService from '../services/jobService';
+import ProjectService from '../../services/projectService';
+import JobService from '../../services/jobService';
 
 const PostProject = () => {
   const navigate = useNavigate();

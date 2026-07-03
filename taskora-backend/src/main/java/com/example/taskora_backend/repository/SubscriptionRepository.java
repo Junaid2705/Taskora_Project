@@ -3,6 +3,7 @@ package com.example.taskora_backend.repository;
 import com.example.taskora_backend.model.Subscription;
 import com.example.taskora_backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -24,4 +25,10 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     long countByCreatorAndStatus(User creator, Subscription.SubscriptionStatus status);
 
     long countByStatus(Subscription.SubscriptionStatus status);
+
+    @Modifying
+    void deleteByCreator(User creator);
+
+    @Modifying
+    void deleteBySubscriber(User subscriber);
 }

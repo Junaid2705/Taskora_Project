@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import JobService from '../services/jobService';
-import { budgetRange, timeAgo, statusPill } from '../lib/format';
+import JobService from '../../services/jobService';
+import { budgetRange, timeAgo, statusPill } from '../../lib/format';
 
 const MyJobs = () => {
   const [jobs, setJobs] = useState([]);

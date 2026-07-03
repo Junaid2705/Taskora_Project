@@ -69,7 +69,7 @@ const Login = () => {
           </div>
 
           <div className="d-flex flex-column gap-2 mb-4">
-            <button type="button" className="tk-social-btn"><i className="bi bi-google text-danger"></i> Continue with Google</button>
+            <button type="button" className="tk-social-btn" onClick={() => alert('Google login coming soon!')}><i className="bi bi-google text-danger"></i> Continue with Google</button>
             {/* <button type="button" className="tk-social-btn"><i className="bi bi-linkedin text-primary"></i> Continue with LinkedIn</button> */}
           </div>
 
