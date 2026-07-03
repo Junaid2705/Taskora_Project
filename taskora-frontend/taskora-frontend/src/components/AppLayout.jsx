@@ -72,6 +72,7 @@ const AppLayout = () => {
         {isCreator && sideLink("/creator-dashboard", "bi-palette-fill", "Creator Studio")}
         {isCreator && sideLink("/creator-plan", "bi-currency-dollar", "My Plan")}
         {isCreator && sideLink("/creator-subscribers", "bi-people-fill", "Subscribers")}
+        {isCreator && sideLink("/creator-verification", "bi-shield-check", "Verification")}
 
         <div className="tk-sidebar-section">Account</div>
         {sideLink("/profile", "bi-person-circle", "Profile")}

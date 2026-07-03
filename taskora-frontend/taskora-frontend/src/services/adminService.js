@@ -91,6 +91,23 @@ class AdminService {
   deletePost(id) {
     return axios.delete(API + `posts/${id}`, { headers: authHeader() });
   }
+
+  // Verification
+  getVerificationsPending() {
+    return axios.get('http://localhost:8081/api/verification/pending', { headers: authHeader() });
+  }
+
+  getVerificationsAll() {
+    return axios.get('http://localhost:8081/api/verification/all', { headers: authHeader() });
+  }
+
+  approveVerification(id, remarks) {
+    return axios.put(`http://localhost:8081/api/verification/${id}/approve`, { remarks }, { headers: authHeader() });
+  }
+
+  rejectVerification(id, remarks) {
+    return axios.put(`http://localhost:8081/api/verification/${id}/reject`, { remarks }, { headers: authHeader() });
+  }
 }
 
 export default new AdminService();

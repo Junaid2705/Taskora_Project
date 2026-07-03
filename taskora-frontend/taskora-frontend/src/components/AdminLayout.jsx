@@ -7,6 +7,7 @@ import Avatar from "./Avatar";
 const links = [
   { to: "/admin", icon: "bi-grid-1x2-fill", label: "Dashboard", end: true },
   { to: "/admin/users", icon: "bi-people-fill", label: "Users" },
+  { to: "/admin/verification", icon: "bi-shield-check", label: "Verification" },
   { to: "/admin/jobs", icon: "bi-briefcase-fill", label: "Jobs" },
   { to: "/admin/projects", icon: "bi-folder-fill", label: "Projects" },
   { to: "/admin/posts", icon: "bi-newspaper", label: "Posts" },

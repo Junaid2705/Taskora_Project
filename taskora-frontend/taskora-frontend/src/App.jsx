@@ -53,6 +53,10 @@ import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminApplications from "./pages/admin/AdminApplications";
 import AdminCms from "./pages/admin/AdminCms";
 import AdminPosts from "./pages/admin/AdminPosts";
+import AdminVerification from "./pages/admin/AdminVerification";
+
+// Creator pages (verification)
+import CreatorVerification from "./pages/creator/CreatorVerification";
 
 // Extra pages
 import ReportUser from "./pages/ReportUser";
@@ -111,6 +115,7 @@ function App() {
           <Route path="/creator-dashboard" element={<CreatorDashboard />} />
           <Route path="/creator-plan" element={<CreatorPlan />} />
           <Route path="/creator-subscribers" element={<CreatorSubscribers />} />
+          <Route path="/creator-verification" element={<CreatorVerification />} />
         </Route>
 
         {/* Admin panel */}
@@ -134,6 +139,7 @@ function App() {
           <Route path="/admin/reports" element={<AdminReports />} />
           <Route path="/admin/cms" element={<AdminCms />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/verification" element={<AdminVerification />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
