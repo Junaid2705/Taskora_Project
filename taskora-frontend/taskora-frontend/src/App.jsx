@@ -34,6 +34,11 @@ import Search from "./pages/Search";
 import Subscriptions from "./pages/Subscriptions";
 import PortfolioPage from "./pages/PortfolioPage";
 
+// Creator pages
+import CreatorDashboard from "./pages/creator/CreatorDashboard";
+import CreatorPlan from "./pages/creator/CreatorPlan";
+import CreatorSubscribers from "./pages/creator/CreatorSubscribers";
+
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -101,6 +106,9 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/report" element={<ReportUser />} />
+          <Route path="/creator-dashboard" element={<CreatorDashboard />} />
+          <Route path="/creator-plan" element={<CreatorPlan />} />
+          <Route path="/creator-subscribers" element={<CreatorSubscribers />} />
         </Route>
 
         {/* Admin panel */}
