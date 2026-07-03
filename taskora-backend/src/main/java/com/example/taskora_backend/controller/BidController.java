@@ -54,6 +54,13 @@ public class BidController {
         return ResponseEntity.ok(bidService.getMyBids(AuthUtils.currentUserId()));
     }
 
+    // Check if current user has already bid on a project
+    @GetMapping("/check/{projectId}")
+    public ResponseEntity<?> hasBid(@PathVariable Long projectId) {
+        boolean hasBid = bidService.hasBid(projectId, AuthUtils.currentUserId());
+        return ResponseEntity.ok(Map.of("bid", hasBid));
+    }
+
     // Project owner accepts a bid
     @PutMapping("/{id}/accept")
     public ResponseEntity<?> acceptBid(@PathVariable Long id) {

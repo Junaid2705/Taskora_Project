@@ -24,6 +24,7 @@ const ProjectDetails = () => {
   const [err, setErr] = useState('');
   const [bid, setBid] = useState({ proposal: '', bidAmount: '', deliveryDays: '' });
   const [bidMsg, setBidMsg] = useState('');
+  const [alreadyBid, setAlreadyBid] = useState(false);
 
   const isOwner = project && project.user && project.user.userId === user.id;
 
@@ -34,6 +35,12 @@ const ProjectDetails = () => {
       .then((r) => { setProject(r.data); if (r.data.user?.userId === user.id) loadBids(); })
       .catch(() => setErr('Project not found.'))
       .finally(() => setLoading(false));
+    // Check if user already bid
+    if (!isEmployer) {
+      BidService.checkBid(id)
+        .then((r) => setAlreadyBid(r.data.bid === true))
+        .catch(() => {});
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -129,6 +136,15 @@ const ProjectDetails = () => {
               <button className="btn btn-outline-primary w-100" onClick={onDelete}>Delete Project</button>
             </div>
           ) : !isEmployer && project.projectStatus === 'OPEN' ? (
+            alreadyBid ? (
+              <div className="tk-card tk-card-pad">
+                <h6 className="fw-bold mb-3">Your Bid</h6>
+                <div className="alert alert-success py-2 mb-0 d-flex align-items-center gap-2">
+                  <i className="bi bi-check-circle-fill"></i>
+                  <span>You have already submitted a bid for this project.</span>
+                </div>
+              </div>
+            ) : (
             <div className="tk-card tk-card-pad">
               <h6 className="fw-bold mb-3">Submit a Bid</h6>
               {bidMsg === 'success' && <div className="alert alert-success py-2 small">Bid submitted!</div>}
@@ -152,6 +168,7 @@ const ProjectDetails = () => {
                 <button className="btn btn-primary w-100">Submit Bid</button>
               </form>
             </div>
+            )
           ) : (
             <div className="tk-card tk-card-pad">
               <h6 className="fw-bold mb-3">Project Details</h6>

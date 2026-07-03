@@ -24,6 +24,10 @@ class BidService {
     return axios.get(API + 'bids/my-bids', { headers: authHeader() });
   }
 
+  checkBid(projectId) {
+    return axios.get(API + `bids/check/${projectId}`, { headers: authHeader() });
+  }
+
   acceptBid(id) {
     return axios.put(API + `bids/${id}/accept`, {}, { headers: authHeader() });
   }

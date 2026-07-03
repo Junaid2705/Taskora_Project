@@ -86,6 +86,13 @@ public class BidService {
         return bidRepository.findByFreelancer(getUser(freelancerId));
     }
 
+    /** Check if a user has already bid on a project. */
+    public boolean hasBid(Long projectId, Long freelancerId) {
+        Project project = getProject(projectId);
+        User freelancer = getUser(freelancerId);
+        return bidRepository.existsByProjectAndFreelancer(project, freelancer);
+    }
+
     /** Project owner accepts a bid: it becomes ACCEPTED, all others REJECTED, project moves to IN_PROGRESS. */
     @Transactional
     public ProjectBid acceptBid(Long bidId, Long ownerId) {

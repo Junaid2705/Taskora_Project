@@ -102,6 +102,17 @@ public class JobApplicationController {
         return ResponseEntity.ok(myApplications);
     }
 
+    // 5. Check if current user has already applied to a job
+    @GetMapping("/check/{jobId}")
+    public ResponseEntity<?> hasApplied(@PathVariable Long jobId) {
+        User freelancer = userRepository.findById(AuthUtils.currentUserId())
+                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found."));
+        boolean applied = applicationRepository.existsByJobAndFreelancer(job, freelancer);
+        return ResponseEntity.ok(Map.of("applied", applied));
+    }
+
     // 4. Update an application's status (For Employers who own the job)
     //    Accepted values: PENDING, REVIEWING, ACCEPTED, REJECTED
     @PutMapping("/{applicationId}/status")

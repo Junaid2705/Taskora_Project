@@ -51,6 +51,10 @@ class JobService {
     return axios.get(API + 'applications/my-applications', { headers: authHeader() });
   }
 
+  checkApplied(jobId) {
+    return axios.get(API + `applications/check/${jobId}`, { headers: authHeader() });
+  }
+
   updateApplicationStatus(applicationId, status) {
     return axios.put(API + `applications/${applicationId}/status`, { status }, { headers: authHeader() });
   }

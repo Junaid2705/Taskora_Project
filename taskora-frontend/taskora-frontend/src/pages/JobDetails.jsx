@@ -19,13 +19,20 @@ const JobDetails = () => {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
+  const [alreadyApplied, setAlreadyApplied] = useState(false);
 
   useEffect(() => {
     JobService.getJob(id)
       .then((r) => setJob(r.data))
       .catch(() => setErr('Job not found.'))
       .finally(() => setLoading(false));
-  }, [id]);
+    // Check if user already applied
+    if (!isEmployer) {
+      JobService.checkApplied(id)
+        .then((r) => setAlreadyApplied(r.data.applied === true))
+        .catch(() => {});
+    }
+  }, [id, isEmployer]);
 
   const onDelete = async () => {
     if (!window.confirm('Delete this job?')) return;
@@ -97,7 +104,13 @@ const JobDetails = () => {
             ) : (
               <div className="d-grid gap-2">
                 {!isEmployer && job.status === 'OPEN' && (
-                  <Link to={`/apply/${job.jobId}`} className="btn btn-primary">Apply Now</Link>
+                  alreadyApplied ? (
+                    <button className="btn btn-success" disabled>
+                      <i className="bi bi-check-circle me-1"></i>Already Applied
+                    </button>
+                  ) : (
+                    <Link to={`/apply/${job.jobId}`} className="btn btn-primary">Apply Now</Link>
+                  )
                 )}
                 <button className="btn btn-outline-primary"><i className="bi bi-bookmark me-1"></i>Save Job</button>
                 <Link to={`/report?type=Job&target=${job.employer?.userId || ''}`} className="btn btn-outline-danger btn-sm mt-2">
