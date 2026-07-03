@@ -12,6 +12,7 @@ import Register from "./pages/Register";
 import VerifyEmail from "./pages/VerifyEmail";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import SelectRole from "./pages/SelectRole";
 
 // App pages
 import Dashboard from "./pages/Dashboard";
@@ -76,6 +77,7 @@ function App() {
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/select-role" element={<SelectRole />} />
         <Route path="/page/:slug" element={<CmsPage />} />
 
         {/* Authenticated app (sidebar + topbar + mobile nav) */}

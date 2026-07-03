@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import AuthService from "../services/authService";
 import Brand from "../components/Brand";
 
@@ -45,6 +46,55 @@ const Register = () => {
     } catch (err) {
       setError(
         err.response?.data?.error || "Registration failed. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    if (!window.google) {
+      setError("Google Sign-In is loading. Please try again in a moment.");
+      return;
+    }
+    window.google.accounts.id.initialize({
+      client_id: "YOUR_GOOGLE_CLIENT_ID_HERE",
+      callback: handleGoogleCallback,
+    });
+    window.google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        setError(
+          "Google popup was blocked or dismissed. Please allow popups or try again."
+        );
+      }
+    });
+  };
+
+  const handleGoogleCallback = async (response) => {
+    setError("");
+    setLoading(true);
+    try {
+      const res = await axios.post("http://localhost:8081/api/auth/google", {
+        credential: response.credential,
+      });
+      const data = res.data;
+      if (data.needsRole) {
+        navigate("/select-role", {
+          state: {
+            googleEmail: data.googleEmail,
+            googleName: data.googleName,
+            googleId: data.googleId,
+          },
+        });
+      } else {
+        localStorage.setItem("user", JSON.stringify(data));
+        navigate("/dashboard", { replace: true });
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Google sign-up failed."
       );
     } finally {
       setLoading(false);
@@ -197,6 +247,18 @@ const Register = () => {
               {loading ? "Creating..." : "Register"}
             </button>
           </form>
+
+          <div className="d-flex align-items-center my-3 text-muted small">
+            <hr className="flex-grow-1" />
+            <span className="mx-2">OR</span>
+            <hr className="flex-grow-1" />
+          </div>
+
+          <div className="d-flex flex-column gap-2 mb-4">
+            <button type="button" className="tk-social-btn" onClick={handleGoogleLogin}>
+              <i className="bi bi-google text-danger"></i> Continue with Google
+            </button>
+          </div>
 
           <p className="text-center text-muted mb-0">
             Already have an account?{" "}

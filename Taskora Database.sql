@@ -209,12 +209,7 @@ show tables;
 
 select *from users;
 
-DROP DATABASE taskora_db;
-CREATE DATABASE taskora_db;
-use taskora_db;
-show tables;
-select *from users;
-SHOW CREATE TABLE users;
+
 INSERT INTO categories (category_name, description, status) VALUES 
 ('Web Development', 'Frontend, Backend, and Full Stack development', true),
 ('Graphic Design', 'Logos, UI/UX, and illustration', true),

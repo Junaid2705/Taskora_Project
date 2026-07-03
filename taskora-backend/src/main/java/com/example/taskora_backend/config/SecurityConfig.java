@@ -61,7 +61,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll() // Login & Register are public
                 .requestMatchers("/ws/**").permitAll() // WebSocket handshake (auth happens on STOMP CONNECT)
                 .requestMatchers("/uploads/**").permitAll() // Publicly serve uploaded images (avatars, covers)
-                .requestMatchers("/sitemap.xml", "/robots.txt", "/api/seo/**", "/api/settings", "/api/presence/**").permitAll()
+                .requestMatchers("/sitemap.xml", "/robots.txt", "/api/seo/**", "/api/settings", "/api/presence/**", "/error").permitAll()
                 
                 // --- NEW: Allow public access to Categories and Job Feed ---
                 .requestMatchers("/api/jobs/categories", "/api/jobs/feed", "/api/jobs/search", "/api/categories/active", "/api/projects/feed", "/api/projects/search", "/api/subscriptions/count/**", "/api/subscriptions/creators", "/api/cms", "/api/cms/**").permitAll()
@@ -82,9 +82,9 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Vite default port
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
