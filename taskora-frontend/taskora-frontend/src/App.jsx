@@ -13,6 +13,8 @@ import VerifyEmail from "./pages/VerifyEmail";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import SelectRole from "./pages/SelectRole";
+import PrivacyPolicy from "./pages/landing/PrivacyPolicy";
+import TermsConditions from "./pages/landing/TermsConditions";
 
 // App pages
 import Dashboard from "./pages/Dashboard";
@@ -82,6 +84,8 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/select-role" element={<SelectRole />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-conditions" element={<TermsConditions />} />
         <Route path="/page/:slug" element={<CmsPage />} />
 
         {/* Authenticated app (sidebar + topbar + mobile nav) */}

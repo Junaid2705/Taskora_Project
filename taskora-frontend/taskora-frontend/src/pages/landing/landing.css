@@ -1,0 +1,560 @@
+/* ============================================================
+   TASKORA LANDING PAGE STYLES
+   ============================================================
+   Organized by section. Future developers: edit content in the 
+   corresponding JSX file (HeroSection.jsx, ServicesSection.jsx, etc.)
+   and styles here.
+   ============================================================ */
+
+/* --- Common Landing --- */
+.tk-landing-subtitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #2563eb;
+  margin-bottom: 0.5rem;
+}
+
+.tk-section-title {
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: #0f172a;
+  margin-bottom: 1rem;
+}
+
+.tk-accent-text {
+  color: #2563eb;
+}
+
+/* --- HERO SECTION --- */
+.tk-landing-hero {
+  padding: 5rem 0 4rem;
+  background: linear-gradient(135deg, #f8faff 0%, #eff6ff 50%, #f0f9ff 100%);
+  overflow: hidden;
+}
+
+.tk-landing-title {
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #0f172a;
+}
+
+.tk-landing-desc {
+  font-size: 1.1rem;
+  color: #64748b;
+  max-width: 500px;
+  margin-top: 1rem;
+}
+
+.tk-landing-btn {
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.tk-hero-visual {
+  position: relative;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tk-hero-illustration svg {
+  width: 100%;
+  max-width: 350px;
+}
+
+.tk-hero-card {
+  position: absolute;
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  box-shadow: 0 8px 32px rgba(37, 99, 235, 0.12);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+.tk-hero-card i {
+  font-size: 1.2rem;
+  color: #2563eb;
+}
+
+.tk-hero-card-1 { top: 10%; left: 0; animation-delay: 0s; }
+.tk-hero-card-2 { top: 50%; right: 0; animation-delay: 0.5s; }
+.tk-hero-card-3 { bottom: 10%; left: 5%; animation-delay: 1s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* --- FEATURES SECTION --- */
+.tk-landing-features {
+  padding: 4rem 0;
+  background: #fff;
+}
+
+.tk-feature-box {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.tk-feature-box:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px rgba(37, 99, 235, 0.1);
+  border-color: #2563eb;
+}
+
+.tk-feature-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin: 0 auto;
+}
+
+/* --- ABOUT SECTION --- */
+.tk-landing-about {
+  padding: 5rem 0;
+  background: #f8fafc;
+}
+
+.tk-about-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.tk-about-stat {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.tk-about-stat:hover {
+  box-shadow: 0 8px 30px rgba(37, 99, 235, 0.08);
+  transform: translateY(-4px);
+}
+
+.tk-about-stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #2563eb;
+}
+
+.tk-about-stat-label {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+/* --- SERVICES SECTION --- */
+.tk-landing-services {
+  padding: 5rem 0;
+  background: #fff;
+}
+
+.tk-service-card {
+  padding: 2rem;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.tk-service-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 48px rgba(37, 99, 235, 0.1);
+  border-color: transparent;
+}
+
+.tk-service-icon {
+  font-size: 2rem;
+}
+
+.tk-service-link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: gap 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.tk-service-link:hover {
+  gap: 0.6rem;
+}
+
+/* --- HOW IT WORKS SECTION --- */
+.tk-landing-howitworks {
+  padding: 5rem 0;
+  background: #f8fafc;
+}
+
+.tk-step-card {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  position: relative;
+  height: 100%;
+}
+
+.tk-step-number {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- TESTIMONIALS SECTION --- */
+.tk-landing-testimonials {
+  padding: 5rem 0;
+  background: #fff;
+}
+
+.tk-testimonial-box {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.tk-quote-icon {
+  font-size: 3rem;
+  color: #2563eb;
+  opacity: 0.3;
+}
+
+.tk-testimonial-text {
+  font-size: 1.1rem;
+  color: #334155;
+  line-height: 1.7;
+  margin: 1rem 0 1.5rem;
+  font-style: italic;
+}
+
+.tk-testimonial-stars {
+  margin-bottom: 1.5rem;
+}
+
+.tk-testimonial-stars i {
+  font-size: 1.1rem;
+  margin: 0 2px;
+}
+
+.tk-testimonial-author {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.tk-testimonial-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tk-testimonial-nav {
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* --- CTA SECTION --- */
+.tk-landing-cta {
+  padding: 5rem 0;
+  background: #f8fafc;
+}
+
+.tk-cta-box {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%);
+  border-radius: 24px;
+  padding: 3.5rem;
+  box-shadow: 0 20px 60px rgba(37, 99, 235, 0.25);
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  .tk-landing-hero { padding: 3rem 0 2rem; }
+  .tk-hero-visual { min-height: 260px; margin-top: 2rem; }
+  .tk-hero-card { font-size: 0.75rem; padding: 0.5rem 1rem; }
+  .tk-about-stats-grid { gap: 0.75rem; }
+  .tk-about-stat { padding: 1.25rem; }
+  .tk-about-stat-value { font-size: 1.5rem; }
+  .tk-cta-box { padding: 2rem; }
+  .tk-landing-about,
+  .tk-landing-services,
+  .tk-landing-howitworks,
+  .tk-landing-testimonials,
+  .tk-landing-cta { padding: 3rem 0; }
+}
+
+
+/* --- STATS BAR SECTION --- */
+.tk-landing-stats {
+  padding: 3rem 0;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tk-stats-bar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.tk-stat-item {
+  text-align: center;
+}
+
+.tk-stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-top: 0.5rem;
+}
+
+.tk-stat-label {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* --- FAQ SECTION --- */
+.tk-landing-faq {
+  padding: 5rem 0;
+  background: #fff;
+}
+
+.tk-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tk-faq-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.tk-faq-item.open {
+  border-color: #2563eb;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
+}
+
+.tk-faq-question {
+  width: 100%;
+  background: #fff;
+  border: none;
+  padding: 1.25rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tk-faq-question:hover {
+  background: #f8fafc;
+}
+
+.tk-faq-question i {
+  font-size: 1.2rem;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.tk-faq-answer {
+  padding: 0 1.5rem 1.25rem;
+  animation: fadeIn 0.2s;
+}
+
+.tk-faq-answer p {
+  color: #64748b;
+  margin: 0;
+  line-height: 1.7;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- NAVBAR MOBILE --- */
+.tk-mobile-nav {
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+  animation: slideDown 0.2s ease;
+}
+
+.tk-mobile-nav-link {
+  display: block;
+  padding: 0.75rem 0;
+  color: #0f172a;
+  font-weight: 500;
+  text-decoration: none;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tk-mobile-nav-link:hover {
+  color: #2563eb;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- FOOTER --- */
+.tk-footer {
+  background: #fff;
+  color: #334155;
+  padding: 4rem 0 2rem;
+  margin-top: auto;
+  border-top: 1px solid #e2e8f0;
+}
+
+.tk-footer h6 {
+  color: #0f172a;
+}
+
+.tk-footer-links {
+  margin: 0;
+  padding: 0;
+}
+
+.tk-footer-links li {
+  margin-bottom: 0.6rem;
+}
+
+.tk-footer-links a {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.tk-footer-links a:hover {
+  color: #2563eb;
+}
+
+.tk-footer-links li:not(:has(a)) {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.tk-social-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.tk-social-icon:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* --- ADDITIONAL MOBILE RESPONSIVE --- */
+@media (max-width: 768px) {
+  .tk-stats-bar {
+    gap: 1.5rem;
+  }
+  .tk-stat-item {
+    flex: 0 0 45%;
+  }
+  .tk-stat-value {
+    font-size: 1.4rem;
+  }
+  .tk-faq-question {
+    font-size: 0.9rem;
+    padding: 1rem 1.25rem;
+  }
+  .tk-footer {
+    padding: 3rem 0 1.5rem;
+  }
+  .tk-service-card {
+    padding: 1.5rem;
+  }
+  .tk-step-card {
+    padding: 1.5rem 1rem;
+  }
+  .tk-testimonial-text {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .tk-landing-title {
+    font-size: 1.8rem;
+  }
+  .tk-section-title {
+    font-size: 1.4rem;
+  }
+  .tk-hero-card {
+    font-size: 0.7rem;
+    padding: 0.5rem 0.75rem;
+  }
+  .tk-hero-card-2 { right: -5px; }
+  .tk-about-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .tk-about-stat {
+    padding: 1rem;
+  }
+  .tk-about-stat-value {
+    font-size: 1.3rem;
+  }
+}
