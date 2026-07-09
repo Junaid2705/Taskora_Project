@@ -24,6 +24,7 @@ import PostJob from "./pages/employer/PostJob";
 import ApplyJob from "./pages/freelancer/ApplyJob";
 import MyApplications from "./pages/freelancer/MyApplications";
 import MyJobs from "./pages/employer/MyJobs";
+import MyProjects from "./pages/employer/MyProjects";
 import ViewApplications from "./pages/employer/ViewApplications";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
@@ -108,6 +109,7 @@ function App() {
           <Route path="/apply/:jobId" element={<ApplyJob />} />
           <Route path="/my-applications" element={<MyApplications />} />
           <Route path="/my-jobs" element={<MyJobs />} />
+          <Route path="/my-projects" element={<MyProjects />} />
           <Route path="/applications/job/:jobId" element={<ViewApplications />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/projects/:id" element={<ProjectDetails />} />

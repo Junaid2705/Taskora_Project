@@ -65,6 +65,7 @@ const AppLayout = () => {
         {!isEmployer && sideLink("/subscriptions", "bi-star-fill", "Subscriptions")}
         {isFreelancer && sideLink("/my-portfolio", "bi-images", "Portfolio")}
         {isEmployer && sideLink("/my-jobs", "bi-file-earmark-text-fill", "My Jobs")}
+        {isEmployer && sideLink("/my-projects", "bi-folder-check", "My Projects")}
         {isEmployer && sideLink("/post-job", "bi-plus-circle-fill", "Post Job")}
         {isEmployer && sideLink("/post-project", "bi-plus-square-fill", "Post Project")}
         {isFreelancer && sideLink("/my-applications", "bi-file-earmark-text-fill", "Applications")}
