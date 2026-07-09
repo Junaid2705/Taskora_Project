@@ -1,5 +1,7 @@
 package com.example.taskora_backend.controller;
 
+import com.example.taskora_backend.model.Job;
+import com.example.taskora_backend.model.Project;
 import com.example.taskora_backend.model.Subscription;
 import com.example.taskora_backend.model.User;
 import com.example.taskora_backend.repository.*;
@@ -153,6 +155,26 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("message", "Job deleted."));
     }
 
+    @PutMapping("/jobs/{id}/approve")
+    public ResponseEntity<?> approveJob(@PathVariable Long id) {
+        requireAdmin();
+        Job job = jobRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found."));
+        job.setStatus(Job.Status.OPEN);
+        jobRepository.save(job);
+        return ResponseEntity.ok(Map.of("message", "Job approved and now visible to freelancers."));
+    }
+
+    @PutMapping("/jobs/{id}/reject")
+    public ResponseEntity<?> rejectJob(@PathVariable Long id, @RequestBody(required = false) Map<String, String> body) {
+        requireAdmin();
+        Job job = jobRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found."));
+        job.setStatus(Job.Status.REJECTED);
+        jobRepository.save(job);
+        return ResponseEntity.ok(Map.of("message", "Job rejected."));
+    }
+
     // =============== Projects Management ===============
     @GetMapping("/projects")
     public ResponseEntity<?> getAllProjects(
@@ -167,6 +189,26 @@ public class AdminController {
         requireAdmin();
         projectRepository.deleteById(id);
         return ResponseEntity.ok(Map.of("message", "Project deleted."));
+    }
+
+    @PutMapping("/projects/{id}/approve")
+    public ResponseEntity<?> approveProject(@PathVariable Long id) {
+        requireAdmin();
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found."));
+        project.setProjectStatus(Project.ProjectStatus.OPEN);
+        projectRepository.save(project);
+        return ResponseEntity.ok(Map.of("message", "Project approved and now visible to freelancers."));
+    }
+
+    @PutMapping("/projects/{id}/reject")
+    public ResponseEntity<?> rejectProject(@PathVariable Long id, @RequestBody(required = false) Map<String, String> body) {
+        requireAdmin();
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found."));
+        project.setProjectStatus(Project.ProjectStatus.REJECTED);
+        projectRepository.save(project);
+        return ResponseEntity.ok(Map.of("message", "Project rejected."));
     }
 
     // =============== Subscriptions Management ===============

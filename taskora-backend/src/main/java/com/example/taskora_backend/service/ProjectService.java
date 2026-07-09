@@ -46,7 +46,7 @@ public class ProjectService {
         Project project = new Project();
         project.setUser(owner);
         applyRequest(project, request);
-        project.setProjectStatus(Project.ProjectStatus.OPEN);
+        project.setProjectStatus(Project.ProjectStatus.PENDING_APPROVAL);
         return projectRepository.save(project);
     }
 
@@ -89,7 +89,7 @@ public class ProjectService {
             return Project.ProjectStatus.valueOf(status.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Invalid status. Use OPEN, IN_PROGRESS or COMPLETED.");
+                    "Invalid status. Use PENDING_APPROVAL, OPEN, IN_PROGRESS, COMPLETED or REJECTED.");
         }
     }
 

@@ -84,6 +84,8 @@ a:hover { color: var(--tk-primary-dark); }
 .tk-pill-green { background: #e7f7ee; color: #16a34a; }
 .tk-pill-orange { background: #fff1e6; color: #ea580c; }
 .tk-pill-gray { background: #f1f5f9; color: #64748b; }
+.tk-pill-warning { background: #fef9c3; color: #a16207; }
+.tk-pill-red { background: #fee2e2; color: #dc2626; }
 
 .tk-skill { background: var(--tk-primary-soft); color: var(--tk-primary); padding: 0.4rem 0.85rem; border-radius: 8px; font-size: 0.82rem; font-weight: 600; }
 

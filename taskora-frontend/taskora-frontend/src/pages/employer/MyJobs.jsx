@@ -38,7 +38,7 @@ const MyJobs = () => {
                   <Link to={`/jobs/${j.jobId}`} className="fw-bold text-dark text-decoration-none">{j.title}</Link>
                   <div className="d-flex flex-wrap gap-2 mt-2">
                     <span className="tk-pill tk-pill-primary">{budgetRange(j.budget)}</span>
-                    <span className={`tk-pill ${statusPill(j.status)}`}>{j.status}</span>
+                    <span className={`tk-pill ${statusPill(j.status)}`}>{j.status === 'PENDING_APPROVAL' ? 'Pending Approval' : j.status}</span>
                     <span className="tk-pill"><i className="bi bi-clock"></i>{timeAgo(j.createdAt)}</span>
                   </div>
                 </div>

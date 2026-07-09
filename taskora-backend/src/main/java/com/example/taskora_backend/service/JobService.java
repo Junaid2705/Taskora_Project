@@ -54,7 +54,7 @@ public class JobService {
         Job job = new Job();
         job.setEmployer(employer);
         applyRequest(job, request, category);
-        job.setStatus(Job.Status.OPEN);
+        job.setStatus(Job.Status.PENDING_APPROVAL);
         return jobRepository.save(job);
     }
 
@@ -102,7 +102,7 @@ public class JobService {
         try {
             return Job.Status.valueOf(status.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status. Use OPEN or CLOSED.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status. Use PENDING_APPROVAL, OPEN, CLOSED or REJECTED.");
         }
     }
 

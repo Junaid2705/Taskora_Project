@@ -26,13 +26,14 @@ export function timeAgo(dateStr) {
 
 export function statusPill(status) {
   const map = {
+    PENDING_APPROVAL: 'tk-pill-warning',
     OPEN: 'tk-pill-green',
     CLOSED: 'tk-pill-gray',
     IN_PROGRESS: 'tk-pill-orange',
     COMPLETED: 'tk-pill-primary',
     PENDING: 'tk-pill-gray',
     SHORTLISTED: 'tk-pill-primary',
-    REJECTED: 'tk-pill-orange',
+    REJECTED: 'tk-pill-red',
     HIRED: 'tk-pill-green',
     ACCEPTED: 'tk-pill-green',
   };

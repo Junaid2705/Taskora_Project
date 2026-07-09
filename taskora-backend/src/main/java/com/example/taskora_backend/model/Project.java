@@ -52,8 +52,10 @@ public class Project {
     private LocalDateTime createdAt;
 
     public enum ProjectStatus {
+        PENDING_APPROVAL,
         OPEN,
         IN_PROGRESS,
-        COMPLETED
+        COMPLETED,
+        REJECTED
     }
 }

@@ -31,6 +31,14 @@ class AdminService {
     return axios.delete(API + `jobs/${id}`, { headers: authHeader() });
   }
 
+  approveJob(id) {
+    return axios.put(API + `jobs/${id}/approve`, {}, { headers: authHeader() });
+  }
+
+  rejectJob(id) {
+    return axios.put(API + `jobs/${id}/reject`, {}, { headers: authHeader() });
+  }
+
   // Projects
   getProjects(page = 0, size = 20) {
     return axios.get(API + 'projects', { params: { page, size }, headers: authHeader() });
@@ -38,6 +46,14 @@ class AdminService {
 
   deleteProject(id) {
     return axios.delete(API + `projects/${id}`, { headers: authHeader() });
+  }
+
+  approveProject(id) {
+    return axios.put(API + `projects/${id}/approve`, {}, { headers: authHeader() });
+  }
+
+  rejectProject(id) {
+    return axios.put(API + `projects/${id}/reject`, {}, { headers: authHeader() });
   }
 
   // Subscriptions

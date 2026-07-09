@@ -60,7 +60,9 @@ public class Job {
     private LocalDateTime createdAt;
 
     public enum Status {
+        PENDING_APPROVAL,
         OPEN,
-        CLOSED
+        CLOSED,
+        REJECTED
     }
 }
