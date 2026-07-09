@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 import AppLayout from "./components/AppLayout";
 import AdminLayout from "./components/AdminLayout";
@@ -15,6 +20,7 @@ import ResetPassword from "./pages/ResetPassword";
 import SelectRole from "./pages/SelectRole";
 import PrivacyPolicy from "./pages/landing/PrivacyPolicy";
 import TermsConditions from "./pages/landing/TermsConditions";
+import ServicePreview from "./pages/landing/ServicePreview"; // <-- NEW: Imported the preview component
 
 // App pages
 import Dashboard from "./pages/Dashboard";
@@ -24,7 +30,6 @@ import PostJob from "./pages/employer/PostJob";
 import ApplyJob from "./pages/freelancer/ApplyJob";
 import MyApplications from "./pages/freelancer/MyApplications";
 import MyJobs from "./pages/employer/MyJobs";
-import MyProjects from "./pages/employer/MyProjects";
 import ViewApplications from "./pages/employer/ViewApplications";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
@@ -69,7 +74,7 @@ import { hasRole } from "./services/auth";
 
 // Admin guard — wraps admin routes
 const AdminRoute = ({ children }) => {
-  if (!hasRole('ADMIN')) return <Navigate to="/dashboard" replace />;
+  if (!hasRole("ADMIN")) return <Navigate to="/dashboard" replace />;
   return children;
 };
 
@@ -88,7 +93,8 @@ function App() {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-conditions" element={<TermsConditions />} />
         <Route path="/page/:slug" element={<CmsPage />} />
-
+        <Route path="/preview/:id" element={<ServicePreview />} />{" "}
+        {/* <-- NEW: Dynamic route added here */}
         {/* Authenticated app (sidebar + topbar + mobile nav) */}
         <Route
           element={
@@ -109,8 +115,10 @@ function App() {
           <Route path="/apply/:jobId" element={<ApplyJob />} />
           <Route path="/my-applications" element={<MyApplications />} />
           <Route path="/my-jobs" element={<MyJobs />} />
-          <Route path="/my-projects" element={<MyProjects />} />
-          <Route path="/applications/job/:jobId" element={<ViewApplications />} />
+          <Route
+            path="/applications/job/:jobId"
+            element={<ViewApplications />}
+          />
           <Route path="/projects" element={<Projects />} />
           <Route path="/projects/:id" element={<ProjectDetails />} />
           <Route path="/post-project" element={<PostProject />} />
@@ -121,9 +129,11 @@ function App() {
           <Route path="/creator-dashboard" element={<CreatorDashboard />} />
           <Route path="/creator-plan" element={<CreatorPlan />} />
           <Route path="/creator-subscribers" element={<CreatorSubscribers />} />
-          <Route path="/creator-verification" element={<CreatorVerification />} />
+          <Route
+            path="/creator-verification"
+            element={<CreatorVerification />}
+          />
         </Route>
-
         {/* Admin panel */}
         <Route
           element={
@@ -147,7 +157,6 @@ function App() {
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/verification" element={<AdminVerification />} />
         </Route>
-
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
